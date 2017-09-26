@@ -6,5 +6,6 @@ import "fmt"
 
 func main() {
 	r := renderEngine.CreateRenderEngine(true)
+    defer r.Destroy()
     fmt.Println(r)
 }
