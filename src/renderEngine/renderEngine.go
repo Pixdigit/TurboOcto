@@ -5,19 +5,31 @@ import "github.com/veandco/go-sdl2/sdl"
 type RenderEngine struct {
 	window        *sdl.Window
 	Renderer      *sdl.Renderer
-	ScreenTexture *sdl.Texture
 }
 
 func (r *RenderEngine) Init() {
+}
 
+func (r *RenderEngine) LoadImage(path string) (*sdl.Texture){
+	i, _ := sdl.LoadBMP("./assets/images/test1.bmp")
+    image, _ := r.Renderer.CreateTextureFromSurface(i)
+	return image
+}
+
+func (r *RenderEngine) Blit(texture *sdl.Texture, dest *sdl.Rect) {
+	r.Renderer.Copy(texture, nil, dest)
+}
+
+func (r *RenderEngine) Flip() {
+	r.Renderer.Present()
+	r.Renderer.Clear()
 }
 
 func (r *RenderEngine) Destroy() {
-	r.ScreenTexture.Destroy()
 	r.Renderer.Destroy()
 	r.window.Destroy()
+	sdl.Quit()
 }
-
 
 func CreateRenderEngine(fullscreen bool) RenderEngine{
 	renderEngine := RenderEngine{}
@@ -29,9 +41,8 @@ func CreateRenderEngine(fullscreen bool) RenderEngine{
 
 	window, _ := sdl.CreateWindow(windowTitle, 0, 0, 0, 0, windowFlags)
 	renderer, _ := sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
-	screenTexture, _ := renderer.CreateTexture(uint32(sdl.PIXELFORMAT_ABGR8888), sdl.TEXTUREACCESS_STREAMING, 0, 0)
 
-	renderEngine = RenderEngine{window: window, Renderer: renderer, ScreenTexture: screenTexture}
+	renderEngine = RenderEngine{window: window, Renderer: renderer}
 
 	return renderEngine
 }
