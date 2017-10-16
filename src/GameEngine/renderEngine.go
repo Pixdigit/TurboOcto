@@ -3,6 +3,13 @@ package GameEngine
 import ("github.com/veandco/go-sdl2/sdl"
 	"github.com/ByteArena/box2d")
 
+
+type Sprite struct {
+	Texture *sdl.Texture
+	Rect *sdl.Rect
+	Body *box2d.B2Body
+}
+
 type graphicsInterface struct {
 	window        *sdl.Window
 	renderer      *sdl.Renderer
@@ -52,10 +59,4 @@ func CreateGraphicsInterface(fullscreen bool) (graphicsInterface){
 	gi = graphicsInterface{window: window, renderer: renderer}
 
 	return gi
-}
-
-type Sprite struct {
-	Texture *sdl.Texture
-	Rect *sdl.Rect
-	Body *box2d.B2Body
 }

@@ -7,6 +7,7 @@ import "fmt"
 func main() {
 	r := GameEngine.CreateGraphicsInterface(true)
     defer r.Destroy()
+	GameEngine.Test()
     sprite := r.LoadImage("./assets/images/test1.bmp")
     r.Blit(sprite)
     r.Flip()
