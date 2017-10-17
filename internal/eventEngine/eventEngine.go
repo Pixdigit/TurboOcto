@@ -1,20 +1,23 @@
-package GameEngine
+package eventEngine
 
 import "github.com/veandco/go-sdl2/sdl"
 import "fmt"
 
 
-var KeyPressHandlers []func(sdl.Scancode)
+type EventEnv struct {
+    newEvents []sdl.Event
+}
 
-
-func UpdateEvents() (running bool) {
+func (env *EventEnv) UpdateEvents() (running bool, newEvents []sdl.Event) {
+    fmt.Print("")
     running = true
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
-		switch e := event.(type) {
+        newEvents = append(newEvents, event)
+        /*switch e := event.(type) {
 		case *sdl.QuitEvent:
 			running = false
             fmt.Println("QuitEvent")
-		/*case *sdl.MouseMotionEvent:
+		case *sdl.MouseMotionEvent:
 			fmt.Printf("[%d ms] MouseMotion\ttype:%d\tid:%d\tx:%d\ty:%d\txrel:%d\tyrel:%d\n",
 				e.Timestamp, e.Type, e.Which, e.X, e.Y, e.XRel, e.YRel)
 		case *sdl.MouseButtonEvent:
@@ -23,9 +26,8 @@ func UpdateEvents() (running bool) {
 		case *sdl.MouseWheelEvent:
 			fmt.Printf("[%d ms] MouseWheel\ttype:%d\tid:%d\tx:%d\ty:%d\n",
 				e.Timestamp, e.Type, e.Which, e.X, e.Y)
-		*/
         case *sdl.KeyDownEvent:
-            KeyPressHandler(e.Keysym.Scancode)
+            append(newEvents, )
             if e.Keysym.Scancode == sdl.SCANCODE_ESCAPE {
                 running = false
             }
@@ -48,19 +50,9 @@ func UpdateEvents() (running bool) {
             fmt.Printf("[%d ms] ControllerDevice\ttype:%d\twhich:%c\n",
                 e.Timestamp, deviceEventType, e.Which)
         */
-        default:
+        /*default:
 			fmt.Printf("Some event\n")
-        }
+        }*/
     }
-    return running
-}
-
-func RegisterKeyPressHandler(f func(sdl.Scancode)) {
-    KeyPressHandlers = append(KeyPressHandlers, f)
-}
-
-func KeyPressHandler(key sdl.Scancode) {
-    for _, f := range KeyPressHandlers {
-        f(key)
-    }
+    return running, newEvents
 }

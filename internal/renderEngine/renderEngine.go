@@ -3,41 +3,16 @@ package renderEngine
 import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/ByteArena/box2d"
+	"github.com/Pixdigit/TurboOcto/internal/sharedStructs"
 	)
 
-var Env box2d.B2World
-
 func Init(env box2d.B2World) {
-	Env = env
 	sdl.InitSubSystem(0)
-}
-
-type Sprite struct {
-	Texture *sdl.Texture
-	Rect *sdl.Rect
-	Body *box2d.B2Body
 }
 
 type GraphicsInterface struct {
 	Window        *sdl.Window
 	Renderer      *sdl.Renderer
-}
-
-func (r *GraphicsInterface) LoadImage(path string, world box2d.B2World) (Sprite){
-	i, _ := sdl.LoadBMP("./assets/images/test1.bmp")
-    image, _ := r.Renderer.CreateTextureFromSurface(i)
-
-	_, _, width, height, _ := image.Query()
-	rect := &sdl.Rect{0, 0, width, height}
-
-	bodyDef := box2d.MakeB2BodyDef()
-	bodyDef.Position.Set(0, -10)
-	body := world.CreateBody(&bodyDef)
-	shape := box2d.MakeB2CircleShape()
-	shape.B2Shape.M_radius = 0.5
-	body.CreateFixture(shape, 0.0)
-
-	return Sprite{image, rect, body}
 }
 
 func CreateGraphicsInterface(fullscreen bool) (GraphicsInterface){
@@ -56,7 +31,13 @@ func CreateGraphicsInterface(fullscreen bool) (GraphicsInterface){
 	return gi
 }
 
-func (r *GraphicsInterface) Blit(sprite Sprite) {
+func (r *GraphicsInterface) LoadImage(path string, world box2d.B2World) (*sdl.Texture){
+	i, _ := sdl.LoadBMP("./assets/images/test1.bmp")
+    image, _ := r.Renderer.CreateTextureFromSurface(i)
+	return image
+}
+
+func (r *GraphicsInterface) Blit(sprite sharedStructs.Sprite) {
 	r.Renderer.Copy(sprite.Texture, nil, sprite.Rect)
 }
 
