@@ -13,7 +13,7 @@ func Update() {
 }
 
 func LoadSphericalObject(filename string, env Environment) (renderEngine.Sprite) {
-    sprite := env.gi.LoadImage(filename)
+    sprite := env.gi.LoadImage(filename, env.world)
     return sprite
 }
 
@@ -22,7 +22,7 @@ type Configuration struct {
     Fullscreen bool
 }
 
-func CreateDefaultCOnfiguration() (Configuration) {
+func CreateDefaultConfiguration() (Configuration) {
     return Configuration{0, -10, true}
 }
 

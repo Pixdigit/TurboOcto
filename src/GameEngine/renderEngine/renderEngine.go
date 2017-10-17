@@ -23,7 +23,7 @@ type GraphicsInterface struct {
 	Renderer      *sdl.Renderer
 }
 
-func (r *GraphicsInterface) LoadImage(path string) (Sprite){
+func (r *GraphicsInterface) LoadImage(path string, world box2d.B2World) (Sprite){
 	i, _ := sdl.LoadBMP("./assets/images/test1.bmp")
     image, _ := r.Renderer.CreateTextureFromSurface(i)
 
@@ -32,7 +32,7 @@ func (r *GraphicsInterface) LoadImage(path string) (Sprite){
 
 	bodyDef := box2d.MakeB2BodyDef()
 	bodyDef.Position.Set(0, -10)
-	body := Env.CreateBody(&bodyDef)
+	body := world.CreateBody(&bodyDef)
 	shape := box2d.MakeB2CircleShape()
 	shape.B2Shape.M_radius = 0.5
 	body.CreateFixture(shape, 0.0)
