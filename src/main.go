@@ -5,17 +5,20 @@ import "./GameEngine"
 import "fmt"
 
 func main() {
-	r := GameEngine.CreateGraphicsInterface(true)
-    defer r.Destroy()
-	GameEngine.Test()
-    sprite := r.LoadImage("./assets/images/test1.bmp")
-    r.Blit(sprite)
-    r.Flip()
-    printer := func(key sdl.Scancode) {fmt.Println(sdl.GetKeyName(sdl.GetKeyFromScancode(key)))}
+
+	conf := GameEngine.CreateDefaultConfiguration()
+	env := GameEngine.CreateEnvironment(conf)
+    defer env.Destroy()
+	sprite := GameEngine.LoadSphericalObject("./assets/images/test1.bmp", env)
+
+	printer := func(key sdl.Scancode) {fmt.Println(sdl.GetKeyName(sdl.GetKeyFromScancode(key)))}
     GameEngine.RegisterKeyPressHandler(printer)
-	/*running := true
+	running := true
+
     for running {
-        running = GameEngine.Update()
-    }*/
+		GameEngine.Blit(sprite, env)
+		GameEngine.Flip(env)
+        GameEngine.Update()
+    }
     sdl.Delay(1000)
 }

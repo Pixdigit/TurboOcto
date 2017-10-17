@@ -7,7 +7,7 @@ import "fmt"
 var KeyPressHandlers []func(sdl.Scancode)
 
 
-func Update() (running bool) {
+func UpdateEvents() (running bool) {
     running = true
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch e := event.(type) {
