@@ -7,25 +7,39 @@ import (
     "github.com/Pixdigit/TurboOcto/internal/renderEngine"
     "github.com/Pixdigit/TurboOcto/internal/eventEngine"
     "github.com/Pixdigit/TurboOcto/internal/sharedStructs"
+    "fmt"
     )
 
+func Init() {
+    renderEngine.Init()
+}
+
 type Configuration struct {
-    XGravitation, YGravitation float64
+    ScreenWidth, ScreenHeight int
     Fullscreen bool
+    XGravitation, YGravitation float64
 }
 
 func CreateDefaultConfiguration() (Configuration) {
-    return Configuration{0, -10, true}
+    return Configuration{0, 0, false, 0, 10}
 }
 
 type Environment struct {
-    gi renderEngine.GraphicsInterface
-    world box2d.B2World
-    eventHandler eventEngine.EventEnv
+    gi *renderEngine.GraphicsInterface
+    world *box2d.B2World
+    eventHandler *eventEngine.EventEnv
 }
 
 func Update(env *Environment) (bool, []sdl.Event) {
+    env.world.Step(1.0 / 60, 6, 2)
     return env.eventHandler.UpdateEvents()
+}
+
+func UpdateSprite(sprite sharedStructs.Sprite) {
+    posVec := sprite.Body.GetPosition()
+    sprite.Rect.X = int32(posVec.X)
+    sprite.Rect.Y = int32(posVec.Y)
+    fmt.Println(sprite.Rect.X, sprite.Rect.Y)
 }
 
 func LoadSphericalObject(filename string, env Environment) (sharedStructs.Sprite) {
@@ -34,23 +48,27 @@ func LoadSphericalObject(filename string, env Environment) (sharedStructs.Sprite
 	rect := &sdl.Rect{0, 0, width, height}
 
 	bodyDef := box2d.MakeB2BodyDef()
-	bodyDef.Position.Set(0, -10)
+	bodyDef.Position.Set(0, 4)
     bodyDef.Type = box2d.B2BodyType.B2_dynamicBody
 	body := env.world.CreateBody(&bodyDef)
     shape := box2d.MakeB2CircleShape()
 	shape.B2Shape.M_radius = 0.5
-	body.CreateFixture(shape, 0.0)
+
+    fixtureDef := box2d.MakeB2FixtureDef()
+    fixtureDef.Shape = &shape
+    fixtureDef.Density = 1
+    fixtureDef.Friction = 0.3
+
+	body.CreateFixtureFromDef(&fixtureDef)
 
     return sharedStructs.Sprite{Texture: image, Rect: rect, Body: body}
 }
 
-
-
 func CreateEnvironment(conf Configuration) (Environment) {
-    gi := renderEngine.CreateGraphicsInterface(true)
+    gi := renderEngine.CreateGraphicsInterface(conf.ScreenWidth, conf.ScreenHeight, conf.Fullscreen)
     world := physicsEngine.CreateWorld(conf.XGravitation, conf.YGravitation)
     eventHandler := eventEngine.EventEnv{}
-    return Environment{gi, world, eventHandler}
+    return Environment{&gi, &world, &eventHandler}
 }
 
 func (env Environment) Destroy() {
