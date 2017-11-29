@@ -4,20 +4,20 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	"github.com/ByteArena/box2d"
 	"github.com/Pixdigit/TurboOcto/internal/sharedStructs"
-	"fmt"
+	"github.com/pkg/errors"
 	)
 
 func Init() {
 	sdl.InitSubSystem(0)
 }
 
-type GraphicsInterface struct {
-	Window        *sdl.Window
+type RenderEngine struct {
 	Renderer      *sdl.Renderer
+	Window        *sdl.Window
 }
 
-func CreateGraphicsInterface(windowWidth, windowHeight int, fullscreen bool) (GraphicsInterface){
-	gi := GraphicsInterface{}
+func NewRenderEngine(windowWidth, windowHeight int, fullscreen bool) (RenderEngine){
+	rE := RenderEngine{}
 	const windowTitle string = "GoGame"
 	var windowFlags uint32 = uint32(sdl.WINDOW_SHOWN)
 	var window *sdl.Window
@@ -28,34 +28,34 @@ func CreateGraphicsInterface(windowWidth, windowHeight int, fullscreen bool) (Gr
 		windowFlags = windowFlags | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
 		window, _ = sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags)
 	} else {
-		fmt.Println("Test")
 		windowFlags = windowFlags | uint32(sdl.WINDOW_MAXIMIZED) | uint32(sdl.WINDOW_RESIZABLE)
-		windowWidth, windowHeight = 150, 150
 		window, _ = sdl.CreateWindow(windowTitle, sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, windowWidth, windowHeight, windowFlags)
 		window.Maximize()
-		//TODO: uncomment after implemented in go-sdl2
-		//window.Resizable(false)
-
+		sdl.Delay(500)
+		width, height := window.GetMaximumSize()
+		window.SetSize(width, height)
 	}
 
 	renderer, _ := sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
 
-	gi = GraphicsInterface{Window: window, Renderer: renderer}
+	rE = RenderEngine{Window: window, Renderer: renderer}
 
-	return gi
+	return rE
 }
 
-func (r *GraphicsInterface) LoadImage(path string, world *box2d.B2World) (*sdl.Texture){
-	i, _ := sdl.LoadBMP(path)
-    image, _ := r.Renderer.CreateTextureFromSurface(i)
-	return image
+func (r *RenderEngine) LoadImage(path string, world *box2d.B2World) (*sdl.Texture, error){
+	i, err := sdl.LoadBMP(path)
+	if err != nil {return &sdl.Texture{}, errors.Wrap(err, "Could not load imagefile " + path)}
+    image, err := r.Renderer.CreateTextureFromSurface(i)
+	if err != nil {return &sdl.Texture{}, errors.Wrap(err, "Could not create texture from image")}
+	return image, nil
 }
 
-func (r *GraphicsInterface) Blit(sprite sharedStructs.Sprite) {
+func (r *RenderEngine) Blit(sprite sharedStructs.Sprite) {
 	r.Renderer.Copy(sprite.Texture, nil, sprite.Rect)
 }
 
-func (r *GraphicsInterface) Flip() {
+func (r *RenderEngine) Flip() {
 	r.Renderer.Present()
 	r.Renderer.Clear()
 }

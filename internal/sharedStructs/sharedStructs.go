@@ -6,6 +6,7 @@ import (
 )
 
 type Sprite struct {
+    Name string
     Texture *sdl.Texture
     Rect *sdl.Rect
     Body *box2d.B2Body
