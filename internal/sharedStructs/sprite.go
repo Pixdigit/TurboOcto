@@ -3,6 +3,7 @@ package sharedStructs
 import (
     "github.com/ByteArena/box2d"
 	"github.com/veandco/go-sdl2/sdl"
+    //"github.com/pkg/errors"
 )
 
 type Sprite struct {

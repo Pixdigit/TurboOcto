@@ -6,6 +6,7 @@ import (
     "github.com/Pixdigit/TurboOcto/internal/physicsEngine"
     "github.com/Pixdigit/TurboOcto/internal/renderEngine"
     "github.com/Pixdigit/TurboOcto/internal/eventEngine"
+    "github.com/pkg/errors"
 )
 
 type Environment struct {
@@ -16,17 +17,21 @@ type Environment struct {
     positionAccuracy, velocityAccuracy int
 }
 
-func CreateEnvironment(conf Configuration) (Environment) {
-    gi := renderEngine.NewRenderEngine(conf.ScreenWidth, conf.ScreenHeight, conf.Fullscreen)
+func CreateEnvironment(conf Configuration) (Environment, error) {
+    gi, err := renderEngine.NewRenderEngine(conf.ScreenWidth, conf.ScreenHeight, conf.Fullscreen)
     world := physicsEngine.CreateWorld(conf.XGravitation, conf.YGravitation)
     eventHandler := eventEngine.EventEnv{}
-    return Environment{&gi, &world, &eventHandler, conf.Timestep, conf.PositionAccuracy, conf.VelocityAccuracy}
+    if err != nil {return Environment{}, errors.Wrap(err, "Error while creating Environment")}
+    return Environment{&gi, &world, &eventHandler, conf.Timestep, conf.PositionAccuracy, conf.VelocityAccuracy}, nil
 }
 
-func (env Environment) Destroy() {
-	env.renderEngine.Renderer.Destroy()
-	env.renderEngine.Window.Destroy()
+func (env Environment) Destroy() (error){
+	err := env.renderEngine.Renderer.Destroy()
+    if err != nil {return errors.Wrap(err, "Could not destroy renderer")}
+	err = env.renderEngine.Window.Destroy()
+    if err != nil {return errors.Wrap(err, "Could not destroy window")}
 	sdl.Quit()
+    return nil
 }
 
 func (env Environment) Update() ([]sdl.Event) {

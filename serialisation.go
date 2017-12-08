@@ -29,7 +29,8 @@ func LoadSpritesFromFile(filename string, env Environment) ([]sharedStructs.Spri
         image, err := env.renderEngine.LoadImage(imagePath, env.world)
         if err != nil {return []sharedStructs.Sprite{}, errors.Wrap(err, "Error reading image from config " + filename)}
 
-        _, _, width, height, _ := image.Query()
+        _, _, width, height, err := image.Query()
+        if err != nil {return []sharedStructs.Sprite{}, errors.Wrap(err, "Error reading image from config " + filename)}
         rect := &sdl.Rect{0, 0, width, height}
 
         bodyDef := box2d.MakeB2BodyDef()
