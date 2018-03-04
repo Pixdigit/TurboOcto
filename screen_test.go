@@ -2,12 +2,9 @@ package TurboOcto
 
 import (
     "github.com/veandco/go-sdl2/sdl"
-    "errors"
     "testing"
     "os"
 )
-
-var strings []string = []string{"TEST", "ẞönDérZäíſĉh€Ń", "1234567890", "", "\n"}
 
 func TestMain(m *testing.M) {
     createScreen()
@@ -15,32 +12,6 @@ func TestMain(m *testing.M) {
     Quit()
     os.Exit(result)
 }
-
-func assert(success bool) error {
-    if !success {
-        return errors.New("assertion failed!")
-    } else {
-        return nil
-    }
-}
-
-func test(success bool, errMsg string, t *testing.T) {
-    err := assert(success)
-    if err != nil {
-        t.Error(errMsg)
-    }
-}
-
-func testAgainstStrings(set func(s string)(error), get func()(string), errMsg string, t *testing.T) {
-    for _, testString := range(strings) {
-        set(testString)
-        result := get()
-        errorMsg := errMsg + ": failed at string \"" + testString + "\"; is " + result
-        test(result == testString, errorMsg, t)
-    }
-}
-
-
 
 func TestScreen(t *testing.T) {
     testDelay := uint32(30)
