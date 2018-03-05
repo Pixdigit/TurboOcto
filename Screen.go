@@ -18,11 +18,8 @@ func SetTitle(title string) error {
 }
 
 func Fullscreen() {
-    //TODO: Wait until go-sdl2 is fixed to not require displayMode
     displayIndex, _ := window.GetDisplayIndex()
-    var displayMode sdl.DisplayMode
-    dmode := & displayMode
-    sdl.GetDesktopDisplayMode(displayIndex, dmode)
+    dmode, _ := sdl.GetDesktopDisplayMode(displayIndex)
     w, h := dmode.W, dmode.H
     window.SetSize(w, h)
     window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
