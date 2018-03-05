@@ -33,4 +33,4 @@ So when creatings a standard game you don't need to configure anything just code
 4. Fully fledged graphical interface
 
 ## Contributing
-Currently the engine is only developed by me. If you have interest feel free to contact or just make pull requests. My discord handle is: Pixdigit#9685
+Currently the engine is only developed by me. If you have interest feel free to contact or just make pull requests. Join the [Discord Server](https://discord.gg/d3R86vC)
