@@ -6,6 +6,8 @@ import (
     "fmt"
     "strings"
     "strconv"
+    "encoding/csv"
+    "os"
 )
 
 var renderer *sdl.Renderer
@@ -71,7 +73,7 @@ func deserialize(raw string) (result interface{}, err error) {
     case "str":
         result = varValue
     default:
-        err = errors.New("unknown var type in deserialisation: " + varType)
+        err = errors.New("unknown var type in deserialisation " + varType)
     }
     return
 }
@@ -80,7 +82,7 @@ func GetConf(confName string) (interface{}, error) {
     config, ok := conf[confName]
     if !ok {return nil, errors.New("configuration " + confName + " does not exist")}
     value, err := deserialize(config)
-    if err != nil {return nil, errors.New("invalid configuration value:")}
+    if err != nil {return nil, errors.New("invalid configuration value")}
     return value, nil
 }
 
@@ -88,7 +90,7 @@ func SetConf(confName string, confValue interface{}) error {
     config, ok := conf[confName]
     if !ok {return errors.New("configuration " + confName + " does not exist")}
     newConfig, err := serialize(confValue)
-    if err != nil {return errors.Wrap(err, "could not change configuration:")}
+    if err != nil {return errors.Wrap(err, "could not change configuration")}
     if typeOfSerialized(config) != typeOfSerialized(newConfig) {return errors.New("configuration must have same type")}
     conf[confName] = newConfig
     return nil
@@ -96,7 +98,46 @@ func SetConf(confName string, confValue interface{}) error {
 
 func AddConf(confName string, initConfValue interface{}) error {
     newConfig, err := serialize(initConfValue)
-    if err != nil {return errors.Wrap(err, "could not add configuration:")}
+    if err != nil {return errors.Wrap(err, "could not add configuration")}
     conf[confName] = newConfig
+    return nil
+}
+
+func SaveConf(filename string) error {
+    var data [][]string
+    for k, v := range(conf) {
+        configuration := []string{k, v}
+        data = append(data, configuration)
+    }
+
+    if ok, err := pathExists("./conf/"); err != nil {
+        return errors.Wrap(err, "could not check wether conf folder exists")
+    } else if !ok {
+        err = os.Mkdir("./conf", os.ModePerm)
+        if err != nil {return errors.Wrap(err, "could not create conf folder")}
+    }
+
+    file, err := os.Create("./conf/" + filename + ".csv")
+    defer file.Close()
+    if err != nil {return errors.Wrap(err, "could not open file " + filename + " to save configuration")}
+    w := csv.NewWriter(file)
+	err = w.WriteAll(data)
+    if err != nil {return errors.Wrap(err, "could not write configuration to file" + filename)}
+
+    return nil
+}
+
+func LoadConf(filename string) error {
+    file, err := os.Open("./conf/" + filename + ".csv")
+    defer file.Close()
+    if err != nil {return errors.Wrap(err, "could not open file " + filename + " to load configuration")}
+    r := csv.NewReader(file)
+	data, err := r.ReadAll()
+    if err != nil {return errors.Wrap(err, "could not read configuration from file " + filename)}
+
+    for _, configuration := range(data) {
+        conf[configuration[0]] = configuration[1]
+    }
+
     return nil
 }
