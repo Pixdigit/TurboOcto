@@ -20,6 +20,9 @@ func init() {
     //TODO: Actually use configuration
     conf["updateOnRefresh"] = "bool:true"
     conf["fullscreen"] = "bool:true"
+    displayIndex, _ := window.GetDisplayIndex()
+    dmode, _ := sdl.GetDesktopDisplayMode(displayIndex)
+    maxWidth, maxHeight = dmode.W, dmode.H
 }
 
 func serialize(variable interface{}) (string, error) {
