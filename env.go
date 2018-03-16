@@ -16,13 +16,39 @@ var displayIndex int //TODO: Dynamically update when window moved
 
 var conf map[string]string = map[string]string{}
 
-func init() {
+func initializeEnvironment() (err error) {
     //TODO: Actually use configuration
-    conf["updateOnRefresh"] = "bool:true"
-    conf["fullscreen"] = "bool:true"
-    displayIndex, _ := window.GetDisplayIndex()
-    dmode, _ := sdl.GetDesktopDisplayMode(displayIndex)
+
+    if ok, err := pathExists("./conf"); err != nil {return errors.Wrap(err, "could not check for configuration")
+    } else if ok {
+        if ok, err := pathExists("./conf/last.csv"); err != nil {return errors.Wrap(err, "failed to check for last configuration")
+        } else if ok {
+            if err := LoadConf("last"); err != nil {return errors.Wrap(err, "could not load last configuration")}
+        } else {
+            if err := LoadDefaultConf(); err != nil {return errors.Wrap(err, "could not initialize environment")}
+        }
+    } else {
+        if err := LoadDefaultConf(); err != nil {return errors.Wrap(err, "could not initialize environment")}
+    }
+
+    displayIndex, err := window.GetDisplayIndex()
+    if err != nil {return errors.Wrap(err, "could not get display index")}
+    dmode, err := sdl.GetDesktopDisplayMode(displayIndex)
+    if err != nil {return errors.Wrap(err, "could not get display mode")}
     maxWidth, maxHeight = dmode.W, dmode.H
+
+    return nil
+}
+func LoadDefaultConf() error {
+    if ok, err := pathExists("./conf/default.csv"); err != nil {return errors.Wrap(err, "failed to check for default configuration")
+    } else if ok {
+        if err := LoadConf("default"); err != nil {return errors.Wrap(err, "could not load default configuration")}
+    } else {
+        //Default Configuration
+        conf["updateOnRefresh"] = "bool:true"
+        conf["fullscreen"] = "bool:true"
+    }
+    return nil
 }
 
 func serialize(variable interface{}) (string, error) {
@@ -50,12 +76,14 @@ func serialize(variable interface{}) (string, error) {
     return result, err
 }
 
-func typeOfSerialized(s string) string {
-    return s[:strings.Index(s, ":")]
+func typeOfSerialized(s string) (string, error) {
+    if !strings.Contains(s, ":") {return "", errors.New("record has untyped values")}
+    return s[:strings.Index(s, ":")], nil
 }
 
 func deserialize(raw string) (result interface{}, err error) {
-    varType := typeOfSerialized(raw)
+    varType, err := typeOfSerialized(raw)
+    if err != nil {return nil, errors.Wrap(err, "could not deserialize \"" + raw + "\"")}
     varValue := raw[strings.Index(raw, ":") + 1:]
 
     switch varType {
@@ -85,16 +113,18 @@ func GetConf(confName string) (interface{}, error) {
     config, ok := conf[confName]
     if !ok {return nil, errors.New("configuration " + confName + " does not exist")}
     value, err := deserialize(config)
-    if err != nil {return nil, errors.New("invalid configuration value")}
+    if err != nil {return nil, errors.New("invalid configuration value \"" + config + "\"")}
     return value, nil
 }
 
 func SetConf(confName string, confValue interface{}) error {
     config, ok := conf[confName]
     if !ok {return errors.New("configuration " + confName + " does not exist")}
-    newConfig, err := serialize(confValue)
-    if err != nil {return errors.Wrap(err, "could not change configuration")}
-    if typeOfSerialized(config) != typeOfSerialized(newConfig) {return errors.New("configuration must have same type")}
+    newConfig, err := serialize(confValue);    if err != nil {return errors.Wrap(err, "could not change configuration")}
+    oldVarType, err := typeOfSerialized(config);    if err != nil {return errors.Wrap(err, "could not check var type")}
+    newVarType, err := typeOfSerialized(config);    if err != nil {return errors.Wrap(err, "could not check var type")}
+
+    if oldVarType != newVarType {return errors.New("configuration must have same type")}
     conf[confName] = newConfig
     return nil
 }
@@ -135,10 +165,13 @@ func LoadConf(filename string) error {
     defer file.Close()
     if err != nil {return errors.Wrap(err, "could not open file " + filename + " to load configuration")}
     r := csv.NewReader(file)
+    r.FieldsPerRecord = 2
 	data, err := r.ReadAll()
     if err != nil {return errors.Wrap(err, "could not read configuration from file " + filename)}
 
     for _, configuration := range(data) {
+        //test if value can be deserialized == valid value
+        _, err := deserialize(configuration[1]);    if err != nil {return errors.Wrap(err, "could not load conf file \"" + filename + "\"")}
         conf[configuration[0]] = configuration[1]
     }
 

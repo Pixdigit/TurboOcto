@@ -3,15 +3,7 @@ package TurboOcto
 import (
     "github.com/veandco/go-sdl2/sdl"
     "testing"
-    "os"
 )
-
-func TestMain(m *testing.M) {
-    createScreen()
-    result := m.Run()
-    Quit()
-    os.Exit(result)
-}
 
 func TestScreen(t *testing.T) {
     testDelay := uint32(30)

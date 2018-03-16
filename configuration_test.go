@@ -31,13 +31,13 @@ func TestConfigurationSystem(t *testing.T) {
         "test1": 0,
         "test2": 3.1415,
         "": true,
-        "äüß \n ?=)(/&%$§!)": "OKAYdokay",
+        "äüß \n ?=):(/&%$§!)": "OKAYdokay",
     }
     for k, v := range confs {
         err := AddConf(k, v)
-        if err != nil {t.Error("error while adding configuration", err)}
+        if err != nil {t.Error(errors.Wrap(err, "error while adding configuration"))}
         confValue, err := GetConf(k)
-        if err != nil {t.Error("could not read back configuration", err)}
+        if err != nil {t.Error(errors.Wrap(err, "could not read back configuration"))}
         test(confValue == v, "configuration is not equal to set value", t)
     }
 
@@ -51,10 +51,9 @@ func TestConfigurationSystem(t *testing.T) {
     err = LoadConf("testFilename")
     if err != nil {t.Error(errors.Wrap(err, "could not load conf"))}
 
-
     for k, v := range oldConf {
         confValue, err := GetConf(k)
-        if err != nil {t.Error("could not read back configuration", err)}
+        if err != nil {t.Error(errors.Wrap(err, "could not read back configuration \"" + k + "\""))}
         confValueStr, err := serialize(confValue)
         test(confValueStr == v, "configuration " + v + " is not equal to set value " + confValueStr, t)
     }

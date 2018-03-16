@@ -1,6 +1,9 @@
 package TurboOcto
 
-import "github.com/veandco/go-sdl2/sdl"
+import (
+    "github.com/veandco/go-sdl2/sdl"
+    "github.com/pkg/errors"
+)
 
 
 type sizerType int32
@@ -22,13 +25,17 @@ const FIX_SCALE sizerType = 3
 const SIMPLE_SCALE scalerType = 1
 
 
-func createScreen() {
+func initializeGraphics() (err error) {
     windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
-    window, _ = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags)
-    renderer, _ = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
-    drawWidth, drawHeight, _ = renderer.GetOutputSize()
+    window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags)
+    if err != nil {return errors.Wrap(err, "could not create window")}
+    renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
+    if err != nil {return errors.Wrap(err, "could not create renderer")}
+    drawWidth, drawHeight, err = renderer.GetOutputSize()
+    if err != nil {return errors.Wrap(err, "could not read output size")}
     currWidth, currHeight = drawWidth, drawHeight
     Clear()
+    return nil
 }
 
 //TODO: Expand to include FavIcon
