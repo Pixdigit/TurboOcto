@@ -1,5 +1,5 @@
 # TurboOcto
-TurboOcto is a "GameEngine" for when you are in a crunch.
+TurboOcto is a game development library (and eventually game engine) for when you are in a crunch.
 If its a Gamejam, a Demoparty, rapid development or just toying around: TurboOcto is there for you.
 
 ## Principles
