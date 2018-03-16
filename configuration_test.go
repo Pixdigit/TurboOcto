@@ -34,10 +34,8 @@ func TestConfigurationSystem(t *testing.T) {
         "äüß \n ?=):(/&%$§!)": "OKAYdokay",
     }
     for k, v := range confs {
-        err := AddConf(k, v)
-        if err != nil {t.Error(errors.Wrap(err, "error while adding configuration"))}
-        confValue, err := GetConf(k)
-        if err != nil {t.Error(errors.Wrap(err, "could not read back configuration"))}
+        err := AddConf(k, v);    if err != nil {t.Error(errors.Wrap(err, "error while adding configuration"))}
+        confValue, err := GetConf(k);    if err != nil {t.Error(errors.Wrap(err, "could not read back configuration"))}
         test(confValue == v, "configuration is not equal to set value", t)
     }
 
@@ -46,16 +44,12 @@ func TestConfigurationSystem(t *testing.T) {
         oldConf[k] = v
     }
 
-    err := SaveConf("testFilename")
-    if err != nil {t.Error(errors.Wrap(err, "could not save conf"))}
-    err = LoadConf("testFilename")
-    if err != nil {t.Error(errors.Wrap(err, "could not load conf"))}
+    err := SaveConf("testFilename");    if err != nil {t.Error(errors.Wrap(err, "could not save conf"))}
+    err = LoadConf("testFilename");    if err != nil {t.Error(errors.Wrap(err, "could not load conf"))}
 
     for k, v := range oldConf {
-        confValue, err := GetConf(k)
-        if err != nil {t.Error(errors.Wrap(err, "could not read back configuration \"" + k + "\""))}
-        confValueStr, err := serialize(confValue)
-        test(confValueStr == v, "configuration " + v + " is not equal to set value " + confValueStr, t)
+        confValue, err := GetConf(k);    if err != nil {t.Error(errors.Wrap(err, "could not read back configuration \"" + k + "\""))}
+        confValueStr, err := serialize(confValue);    test(confValueStr == v, "configuration " + v + " is not equal to set value " + confValueStr, t)
     }
 
 }
