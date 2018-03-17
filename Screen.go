@@ -16,6 +16,8 @@ var xOffset, yOffset int32
 var sizer sizerType
 var scaler scalerType
 
+
+//TODO: implement all scales
 const UNDERFIT_SCALE sizerType = 0
 const OVERFIT_SCALE sizerType = 1
 const STRECH_SCALE sizerType = 2
@@ -24,8 +26,20 @@ const FIX_SCALE sizerType = 3
 //TODO implement scaling methods
 const SIMPLE_SCALE scalerType = 1
 
+var rmask uint32 = 0x000000ff;
+var gmask uint32 = 0x0000ff00;
+var bmask uint32 = 0x00ff0000;
+var amask uint32 = 0xff000000;
 
 func initializeGraphics() (err error) {
+    //Default is LIL_ENDIAN
+    if sdl.BYTEORDER == sdl.BIG_ENDIAN {
+        rmask = 0xff000000;
+        gmask = 0x00ff0000;
+        bmask = 0x0000ff00;
+        amask = 0x000000ff;
+    }
+
     windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
     window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);    if err != nil {return errors.Wrap(err, "could not create window")}
     renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);    if err != nil {return errors.Wrap(err, "could not create renderer")}
