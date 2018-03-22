@@ -18,22 +18,8 @@ var sprites []*Sprite
 func NewSprite() (*Sprite, error) {
     sprite := &Sprite{}
     //ensure sprite is the topmost of level 0
-    if len(sprites) < 1 {
-        sprites = append([]*Sprite{sprite}, sprites...)
-    } else {
-        for i, s := range sprites {
-            if s.layer != 0 {
-                i -= 1
-                tmpSprites := make([]*Sprite, len(sprites)+1)
-        		copy(tmpSprites, sprites[:i])
-        		tmpSprites[i] = sprite
-        		copy(tmpSprites[i+1:], sprites[i:])
-                sprites = tmpSprites
-                break
-            }
-    }
-
-    }
+    sprites = append([]*Sprite{sprite}, sprites...)
+    sprite.ChangeLayer(0)
     return sprite, nil
 }
 func LoadAnimatedSpriteFromTextures(textures []sdl.Texture, delays []int32) (*Sprite, error) {
@@ -77,11 +63,33 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
         surface.Blit(&rect, tmpSurface, nil)
         texture, err := renderer.CreateTextureFromSurface(tmpSurface);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}
         textures = append(textures, *texture)
-
     }
 
     sprite, _ := NewSprite()
     sprite.frames = textures
     sprite.delays = delays
     return sprite, nil
+}
+
+func (s *Sprite) ChangeLayer(layer int32) {
+    s.layer = layer
+    for i := len(sprites) - 1; i >= 0 ; i-- {
+        sp := sprites[i]
+        if sp.layer <= s.layer {
+            for i, sp := range sprites {
+                if s == sp {
+                    var newSprites []*Sprite
+                    newSprites = append(newSprites, sprites[:i]...)
+                    newSprites = append(newSprites, sprites[i + 1:]...)
+                    sprites = newSprites
+                }
+            }
+            var newSprites []*Sprite
+            newSprites = append(newSprites, sprites[:i]...)
+            newSprites = append(newSprites, s)
+            newSprites = append(newSprites, sprites[i:]...)
+            sprites = newSprites
+            break
+        }
+    }
 }
