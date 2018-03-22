@@ -4,7 +4,7 @@ If its a Gamejam, a Demoparty, rapid development or just toying around: TurboOct
 
 ## Principles
 The goal is to write an engine that comes packed with all the work done.
-This means lots of things that SDL is missing will be added such as:
+Based on SDL2 it implements familiar concepts while adding loads of things that are missing in SDL:
 - Premade functions (Transitions, Animations, animated Sprites etc.)
 - Automatic scaler (With different scaling modes)
 - Savestate ecosystem
