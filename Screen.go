@@ -55,6 +55,14 @@ func initializeGraphics() (err error) {
     screenWidth, screenHeight = dmode.W, dmode.H
     drawWidth, drawHeight, err = renderer.GetOutputSize();    if err != nil {return errors.Wrap(err, "could not read output size")}
     vWidth, vHeight = drawWidth, drawHeight
+
+    if ok, err := GetConf("fullscreen"); err != nil { return errors.Wrap(err, "could not get fullscreen conf")
+    } else if ok.(bool) {
+        Fullscreen()
+    } else {
+        Windowed(screenWidth / 4, screenHeight / 4)
+    }
+
     Clear()
     return nil
 }
