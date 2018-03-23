@@ -1,7 +1,6 @@
 package TurboOcto
 
 import (
-    "github.com/veandco/go-sdl2/sdl"
     "github.com/pkg/errors"
     "fmt"
     "strings"
@@ -10,9 +9,6 @@ import (
     "os"
 )
 
-var renderer *sdl.Renderer
-var window *sdl.Window
-var displayIndex int //TODO: Dynamically update when window moved
 
 var conf map[string]string = map[string]string{}
 
@@ -30,10 +26,6 @@ func initializeEnvironment() (err error) {
         err := LoadDefaultConf();    if err != nil {return errors.Wrap(err, "could not initialize environment")}
     }
 
-    displayIndex, err := window.GetDisplayIndex();    if err != nil {return errors.Wrap(err, "could not get display index")}
-    dmode, err := sdl.GetDesktopDisplayMode(displayIndex);    if err != nil {return errors.Wrap(err, "could not get display mode")}
-    screenWidth, screenHeight = dmode.W, dmode.H
-
     return nil
 }
 func LoadDefaultConf() error {
@@ -44,6 +36,7 @@ func LoadDefaultConf() error {
         //Default Configuration
         conf["updateOnRefresh"] = "bool:true"
         conf["fullscreen"] = "bool:true"
+        conf["spriteDelayCarry"] = "bool:true"
     }
     return nil
 }
@@ -74,7 +67,7 @@ func serialize(variable interface{}) (string, error) {
 }
 
 func typeOfSerialized(s string) (string, error) {
-    if !strings.Contains(s, ":") {return "", errors.New("record has untyped values")}
+    if !strings.Contains(s, ":") {return "", errors.New("value is untyped")}
     return s[:strings.Index(s, ":")], nil
 }
 

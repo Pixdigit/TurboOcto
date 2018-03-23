@@ -8,10 +8,11 @@ import (
 
 type Sprite struct {
     Frames  []*sdl.Texture
-    Delays  []int32
     dimensionsHalved [][2]int32
-    FrameIndex int32
     XCenter, YCenter int32
+    Delays  []int32
+    timePassed int32
+    FrameIndex int32
     layer int32
 }
 

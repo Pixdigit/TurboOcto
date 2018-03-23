@@ -10,8 +10,8 @@ import (
 func init() {
     sdl.Init(sdl.INIT_EVERYTHING)
     img.Init(0x0000000F)  // initialize all formats
-    err := initializeGraphics();    if err != nil {fmt.Println(errors.Wrap(err, "could not initialize graphics")); Quit()}
-    err = initializeEnvironment();    if err != nil {fmt.Println(errors.Wrap(err, "could not initialize environment")); Quit()}
+    err := initializeEnvironment();    if err != nil {fmt.Println(errors.Wrap(err, "could not initialize environment")); Quit()}
+    err = initializeGraphics();    if err != nil {fmt.Println(errors.Wrap(err, "could not initialize graphics")); Quit()}
 }
 
 func Update() {

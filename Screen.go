@@ -9,8 +9,8 @@ import (
 type sizerType int32
 type scalerType int32
 
-var drawWidth, drawHeight int32
 var vWidth, vHeight int32
+var drawWidth, drawHeight int32
 var screenWidth, screenHeight int32
 var xOffset, yOffset int32
 var sizer sizerType
@@ -25,6 +25,10 @@ const FIX_SCALE sizerType = 3
 
 //TODO implement scaling methods
 const SIMPLE_SCALE scalerType = 1
+
+var renderer *sdl.Renderer
+var window *sdl.Window
+var displayIndex int //TODO: Dynamically update when window moved
 
 var rmask uint32 = 0x000000ff;
 var gmask uint32 = 0x0000ff00;
@@ -42,10 +46,15 @@ func initializeGraphics() (err error) {
 
     windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
     window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);    if err != nil {return errors.Wrap(err, "could not create window")}
+
     renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);    if err != nil {return errors.Wrap(err, "could not create renderer")}
+
+    displayIndex, err := window.GetDisplayIndex();    if err != nil {return errors.Wrap(err, "could not get display index")}
+    dmode, err := sdl.GetDesktopDisplayMode(displayIndex);    if err != nil {return errors.Wrap(err, "could not get display mode")}
+
+    screenWidth, screenHeight = dmode.W, dmode.H
     drawWidth, drawHeight, err = renderer.GetOutputSize();    if err != nil {return errors.Wrap(err, "could not read output size")}
     vWidth, vHeight = drawWidth, drawHeight
-    screenWidth, screenHeight = drawWidth, drawHeight
     Clear()
     return nil
 }
@@ -63,6 +72,7 @@ func Fullscreen() {
     drawWidth, drawHeight = screenWidth, screenHeight
     FillScreen(0, 0, 0, 0)
     Clear()
+    SetConf("fullscreen", true)
 }
 func Windowed(w, h int32) {
     const SDL_WINDOW_WINDOWED = 0
@@ -71,6 +81,7 @@ func Windowed(w, h int32) {
     drawWidth, drawHeight = w, h
     window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
     Clear()
+    SetConf("fullscreen", true)
 }
 
 func SetSize(w, h int32) {
