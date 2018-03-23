@@ -7,8 +7,10 @@ import (
 )
 
 type Sprite struct {
-    frames  []sdl.Texture
-    delays  []int32
+    Frames  []*sdl.Texture
+    Delays  []int32
+    dimensionsHalved [][2]int32
+    FrameIndex int32
     XCenter, YCenter int32
     layer int32
 }
@@ -22,26 +24,31 @@ func NewSprite() (*Sprite, error) {
     sprite.ChangeLayer(0)
     return sprite, nil
 }
-func LoadAnimatedSpriteFromTextures(textures []sdl.Texture, delays []int32) (*Sprite, error) {
+func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
     if (len(textures) != len(delays)) {return &Sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))}
 
     sprite, _ := NewSprite()
-    sprite.frames = textures
-    sprite.delays = delays
+
+    for _, frame := range textures {
+        _, _, w, h, err := frame.Query();    if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine sprite dimensions")}
+        sprite.dimensionsHalved = append(sprite.dimensionsHalved, [2]int32{w >> 1, h >> 1})
+    }
+
+    sprite.Frames = textures
+    sprite.Delays = delays
     return sprite, nil
 }
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
-    var textures []sdl.Texture
+    var textures []*sdl.Texture
     for _, fileName := range fileNames {
         texture, err := img.LoadTexture(renderer, "./assets/sprites/" + fileName);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/" + fileName)}
-        textures = append(textures, *texture)
+        textures = append(textures, texture)
     }
     return LoadAnimatedSpriteFromTextures(textures, delays)
 }
 func LoadSpriteFromFile(filename string) (*Sprite, error) {
     return LoadAnimatedSpriteFromFiles([]string{filename}, []int32{0})
 }
-//IDEA: Support GIF as textures and delays source
 func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int32) (*Sprite, error) {
     surface, err := img.Load(filename);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite image")}
     if len(rects) == 0 {
@@ -51,7 +58,7 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
             rects = append(rects, sdl.Rect{i * surface.H, 0, surface.H, surface.H})
         }
     }
-    var textures []sdl.Texture
+    var textures []*sdl.Texture
     xOffset := int32(0)
     for _, rect := range rects {
         if rect.W == 0 || rect.H == 0 {
@@ -62,14 +69,11 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
         xOffset += rect.W
         surface.Blit(&rect, tmpSurface, nil)
         texture, err := renderer.CreateTextureFromSurface(tmpSurface);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}
-        textures = append(textures, *texture)
+        textures = append(textures, texture)
     }
-
-    sprite, _ := NewSprite()
-    sprite.frames = textures
-    sprite.delays = delays
-    return sprite, nil
+    return LoadAnimatedSpriteFromTextures(textures, delays)
 }
+
 
 func (s *Sprite) ChangeLayer(layer int32) {
     s.layer = layer
@@ -92,4 +96,11 @@ func (s *Sprite) ChangeLayer(layer int32) {
             break
         }
     }
+}
+
+func (s *Sprite) Blit() error {
+    //Calculate topleft point from dimensions and center
+    destRect := sdl.Rect{s.XCenter - s.dimensionsHalved[s.FrameIndex][0], s.YCenter - s.dimensionsHalved[s.FrameIndex][1], s.dimensionsHalved[s.FrameIndex][0] << 1, s.dimensionsHalved[s.FrameIndex][1] << 1}
+    renderer.Copy(s.Frames[s.FrameIndex], nil, &destRect)
+    return nil
 }

@@ -5,7 +5,7 @@ import (
     "github.com/pkg/errors"
 )
 
-func TestSprites(t *testing.T) {
+func TestSpriteLayers(t *testing.T) {
     sp, err := NewSprite();    if err != nil {t.Error(errors.New("Could not create test sprite"))}
     sp2, err := NewSprite();    if err != nil {t.Error(errors.New("Could not create test sprite"))}
     NewSprite()
