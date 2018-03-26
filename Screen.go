@@ -10,8 +10,8 @@ type sizerType int32
 type scalerType int32
 
 var drawWidth, drawHeight int32
-var currWidth, currHeight int32
-var maxWidth, maxHeight int32
+var vWidth, vHeight int32
+var screenWidth, screenHeight int32
 var xOffset, yOffset int32
 var sizer sizerType
 var scaler scalerType
@@ -44,7 +44,8 @@ func initializeGraphics() (err error) {
     window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);    if err != nil {return errors.Wrap(err, "could not create window")}
     renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);    if err != nil {return errors.Wrap(err, "could not create renderer")}
     drawWidth, drawHeight, err = renderer.GetOutputSize();    if err != nil {return errors.Wrap(err, "could not read output size")}
-    currWidth, currHeight = drawWidth, drawHeight
+    vWidth, vHeight = drawWidth, drawHeight
+    screenWidth, screenHeight = drawWidth, drawHeight
     Clear()
     return nil
 }
@@ -57,9 +58,9 @@ func SetTitle(title string) error {
 }
 
 func Fullscreen() {
-    window.SetSize(maxWidth, maxHeight)
+    window.SetSize(screenWidth, screenHeight)
     window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
-    currWidth, currHeight = maxWidth, maxHeight
+    drawWidth, drawHeight = screenWidth, screenHeight
     FillScreen(0, 0, 0, 0)
     Clear()
 }
@@ -67,13 +68,14 @@ func Windowed(w, h int32) {
     const SDL_WINDOW_WINDOWED = 0
     window.SetFullscreen(SDL_WINDOW_WINDOWED)
     window.SetSize(w, h)
-    currWidth, currHeight = w, h
+    drawWidth, drawHeight = w, h
     window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
     Clear()
 }
 
 func SetSize(w, h int32) {
-    drawWidth, drawHeight = w, h
+    vWidth, vHeight = w, h
+    renderer.SetLogicalSize(vWidth, vHeight)
 }
 func SetScaler(sizer sizerType, scaler scalerType) {
     sizer = sizer
@@ -82,20 +84,22 @@ func SetScaler(sizer sizerType, scaler scalerType) {
 
     switch sizer {
     case UNDERFIT_SCALE:
-        aspectRatioWindow := float64(currWidth) / float64(currHeight)
-        aspectRatioRenderer := float64(drawWidth) / float64(drawHeight)
-        renderer.SetLogicalSize(drawWidth, drawHeight)
-        if aspectRatioRenderer > aspectRatioWindow {
+        aspectRatioWindow := float64(screenWidth) / float64(screenHeight)
+        logicalAspectRatio := float64(vWidth) / float64(vHeight)
+        renderer.SetLogicalSize(vWidth, vHeight)
+        //More width than height
+        if logicalAspectRatio > aspectRatioWindow {
             //TODO: Implement test is offsets are correct
             //window is too thin horizontally
+            drawHeight = int32(float64(screenWidth) / float64(vWidth) * float64(screenHeight))
+            drawWidth = screenWidth
             xOffset = 0
-            //                Get remaining height V          ScaleFactor V             Two sites V
-            yOffset = int32(float64(currHeight) * (1 - float64(drawWidth) / float64(currWidth)) / 2)
+            yOffset = (screenHeight - drawHeight) / 2
         } else {
             //window is too small vertically
-            renderer.SetLogicalSize(drawWidth, drawHeight)
-            //               Get remaining height V           ScaleFactor V              Two sites V
-            xOffset = int32(float64(currWidth) * (1 - float64(drawHeight) / float64(currHeight)) / 2)
+            drawHeight = screenHeight
+            drawWidth = int32(float64(screenHeight) / float64(vHeight) * float64(screenWidth))
+            xOffset = (screenWidth - drawWidth) / 2
             yOffset = 0
         }
     }

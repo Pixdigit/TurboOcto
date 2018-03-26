@@ -32,7 +32,7 @@ func initializeEnvironment() (err error) {
 
     displayIndex, err := window.GetDisplayIndex();    if err != nil {return errors.Wrap(err, "could not get display index")}
     dmode, err := sdl.GetDesktopDisplayMode(displayIndex);    if err != nil {return errors.Wrap(err, "could not get display mode")}
-    maxWidth, maxHeight = dmode.W, dmode.H
+    screenWidth, screenHeight = dmode.W, dmode.H
 
     return nil
 }
