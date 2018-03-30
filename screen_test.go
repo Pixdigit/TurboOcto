@@ -7,7 +7,7 @@ import (
 
 func TestScreen(t *testing.T) {
     testDelay := uint32(30)
-    testAgainstStrings(SetTitle, window.GetTitle, "window title remains unchanged", t)
+    testAgainstStrings(func(s string)(error){err := SetDecoration(s, "../../testEnv/testIcon.png"); return err}, window.GetTitle, "window title remains unchanged", t)
     sdl.Delay(testDelay)
     Windowed(500, 500)
     x, y := window.GetSize()

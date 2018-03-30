@@ -2,6 +2,7 @@ package TurboOcto
 
 import (
     "github.com/veandco/go-sdl2/sdl"
+    "github.com/veandco/go-sdl2/img"
     "github.com/pkg/errors"
 )
 
@@ -67,10 +68,20 @@ func initializeGraphics() (err error) {
     return nil
 }
 
-//TODO: Expand to include FavIcon
-//    Yet waiting for implementation of Sprite system
-func SetTitle(title string) error {
+func SetDecoration(title string, iconPath string) error {
     window.SetTitle(title)
+    iconPath = "./assets/sprites/" + iconPath
+    if iconPath != "" {
+        if exists, err := pathExists(iconPath); err != nil {
+            return errors.Wrap(err, "could not check wether icon file exists")
+        } else if !exists {
+            print(iconPath + "\n")
+            return errors.New("Path to icon does not exist")
+        } else {
+            icon, err := img.Load(iconPath);   if err != nil {return errors.Wrap(err, "could not load icon from path")}
+            window.SetIcon(icon)
+        }
+    }
     return nil
 }
 

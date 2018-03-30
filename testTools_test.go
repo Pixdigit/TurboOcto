@@ -25,7 +25,8 @@ func test(success bool, errMsg string, t *testing.T) {
 
 func testAgainstStrings(set func(s string)(error), get func()(string), errMsg string, t *testing.T) {
     for _, testString := range(testStrings) {
-        set(testString)
+        err := set(testString);    if err != nil {t.Error(errors.Wrap(err, "failed to set string"))}
+        //TODO: check for errs while getting
         result := get()
         errorMsg := errMsg + ": failed at string \"" + testString + "\"; is " + result
         test(result == testString, errorMsg, t)
