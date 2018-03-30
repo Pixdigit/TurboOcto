@@ -76,7 +76,7 @@ func SetDecoration(title string, iconPath string) error {
             return errors.Wrap(err, "could not check wether icon file exists")
         } else if !exists {
             print(iconPath + "\n")
-            return errors.New("Path to icon does not exist")
+            return errors.New("path to icon does not exist")
         } else {
             icon, err := img.Load(iconPath);   if err != nil {return errors.Wrap(err, "could not load icon from path")}
             window.SetIcon(icon)
@@ -119,7 +119,7 @@ func SetScaler(sizer sizerType, scaler scalerType) {
         renderer.SetLogicalSize(vWidth, vHeight)
         //More width than height
         if logicalAspectRatio > aspectRatioWindow {
-            //TODO: Implement test is offsets are correct
+            //TODO: Implement test if offsets are correct
             //window is too thin horizontally
             drawHeight = int32(float64(screenWidth) / float64(vWidth) * float64(screenHeight))
             drawWidth = screenWidth

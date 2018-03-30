@@ -89,7 +89,7 @@ func deserialize(raw string) (interface{}, error) {
         result, err = strconv.Atoi(varValue)
         errors.Wrap(err, "could not deserialize " + varValue + " as int")
     case "float":
-        result, err = strconv.ParseFloat(varValue, 64) //TODO: use future conf infrastructure
+        result, err = strconv.ParseFloat(varValue, 64)
         errors.Wrap(err, "could not deserialize " + varValue + " as float")
     case "str":
         result = varValue
