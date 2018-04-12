@@ -34,9 +34,10 @@ func LoadDefaultConf() error {
         err := LoadConf("default");   if err != nil {return errors.Wrap(err, "could not load default configuration")}
     } else {
         //Default Configuration
-        conf["updateOnRefresh"] = "bool:true"
-        conf["fullscreen"] = "bool:true"
-        conf["spriteDelayCarry"] = "bool:true"
+        AddConf("updateOnRefresh", true)
+        AddConf("fullscreen", true)
+        AddConf("spriteTimerCarry", true)
+        AddConf("spriteTimerUsingFramecount", false)
     }
     return nil
 }
@@ -119,8 +120,13 @@ func SetConf(confName string, confValue interface{}) error {
 }
 
 func AddConf(confName string, initConfValue interface{}) error {
-    newConfig, err := serialize(initConfValue);    if err != nil {return errors.Wrap(err, "could not add configuration")}
+    newConfig, err := serialize(initConfValue);    if err != nil {return errors.Wrap(err, "could not serialize initial conf value")}
     conf[confName] = newConfig
+    return nil
+}
+
+func DelConf(confName string) error {
+    //TODO
     return nil
 }
 

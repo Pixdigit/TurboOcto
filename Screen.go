@@ -16,6 +16,7 @@ var screenWidth, screenHeight int32
 var xOffset, yOffset int32
 var sizer sizerType
 var scaler scalerType
+var frameCount int32
 
 
 //TODO: implement all scales
@@ -133,7 +134,6 @@ func SetScaler(sizer sizerType, scaler scalerType) {
             yOffset = 0
         }
     }
-
 }
 
 
@@ -148,4 +148,5 @@ func Clear() {
 }
 func Present() {
     renderer.Present()
+    frameCount += 1
 }
