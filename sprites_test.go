@@ -6,8 +6,9 @@ import (
 )
 
 func TestSpriteLayers(t *testing.T) {
-    sp, err := NewSprite();    if err != nil {t.Error(errors.New("Could not create test sprite"))}
-    sp2, err := NewSprite();    if err != nil {t.Error(errors.New("Could not create test sprite"))}
+    LoadDefaultConf()
+    sp, err := NewSprite();    if err != nil {t.Error(errors.Wrap(err, "Could not create test sprite"))}
+    sp2, err := NewSprite();    if err != nil {t.Error(errors.Wrap(err, "Could not create test sprite"))}
     NewSprite()
     sp2.ChangeLayer(2)
     sp2.ChangeLayer(3)

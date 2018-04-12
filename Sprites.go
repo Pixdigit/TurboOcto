@@ -11,17 +11,17 @@ type Sprite struct {
     dimensions [][2]int32
     XCenter, YCenter int32
     Delays  []int32
-    timerMode timerMode
+    timerMode int32
     timer int32
     lastBlit int32
     lastFrameCount int32
+    timerCarry bool
     FrameIndex int32
     layer int32
 }
 
-type timerMode int32
-var USE_FRAME_COUNT timerMode = 1
-var USE_TIME_PASSED timerMode = 2
+var USE_FRAME_COUNT int32 = 1
+var USE_TIME_PASSED int32 = 2
 
 var sprites []*Sprite
 
@@ -30,11 +30,11 @@ func NewSprite() (*Sprite, error) {
     //ensure sprite is the topmost of level 0
     sprites = append([]*Sprite{sprite}, sprites...)
     sprite.ChangeLayer(0)
-    if GetConf("SpriteTimerUsingFrameCout") {
-        
-    } else {
 
-    }
+    timerMode, err := GetConf("spriteTimerMode"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.timerMode = int32(timerMode.(int))
+    timerCarry, err := GetConf("spriteTimerCarry"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.timerCarry = timerCarry.(bool)
     return sprite, nil
 }
 func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
@@ -115,8 +115,7 @@ func (s *Sprite) ChangeLayer(layer int32) {
 //TODO: Make Conf Sprite Specific
 func (s *Sprite) Blit() error {
     if s.timer >= s.Delays[s.FrameIndex] {
-        spriteTimerCarry, err := GetConf("spriteTimerCarry");    if err != nil {return errors.Wrap(err, "could not get configuration for spriteTImerCarry")}
-        if spriteTimerCarry == true {
+        if s.timerCarry {
             s.timer = s.timer - s.Delays[s.FrameIndex]
         } else {
             s.timer = 0
@@ -124,12 +123,10 @@ func (s *Sprite) Blit() error {
         s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
     }
 
-    var currentTime int32
-    spriteTimerUsingFramecount, err := GetConf("SpriteTimerUsingFramecount");    if err != nil {return errors.Wrap(err, "could not get configuration for SpriteTimerUsingFrames")}
-    if spriteTimerUsingFramecount == true {
+    currentTime := int32(sdl.GetTicks())
+    if s.timerMode == USE_FRAME_COUNT {
         s.timer += frameCount - s.lastFrameCount
-    } else {
-        currentTime = int32(sdl.GetTicks())
+    } else if s.timerMode == USE_TIME_PASSED {
         s.timer += currentTime - s.lastBlit
     }
     s.lastBlit = int32(currentTime)

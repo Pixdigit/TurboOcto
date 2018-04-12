@@ -34,10 +34,10 @@ func LoadDefaultConf() error {
         err := LoadConf("default");   if err != nil {return errors.Wrap(err, "could not load default configuration")}
     } else {
         //Default Configuration
-        AddConf("updateOnRefresh", true)
-        AddConf("fullscreen", true)
-        AddConf("spriteTimerCarry", true)
-        AddConf("spriteTimerUsingFramecount", false)
+        err := AddConf("updateOnRefresh", true);            if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("fullscreen", true);                  if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("spriteTimerCarry", true); if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("spriteTimerMode", USE_FRAME_COUNT); if err != nil {return errors.Wrap(err, "could not set default configuration")}
     }
     return nil
 }
@@ -53,6 +53,8 @@ func serialize(variable interface{}) (string, error) {
         } else {
             result = "bool:false"
         }
+    case int32:
+        result = "int:" + strconv.Itoa(int(t))
     case int:
         result = "int:" + strconv.Itoa(t)
     case float32:
@@ -62,7 +64,7 @@ func serialize(variable interface{}) (string, error) {
     case string:
         result = "str:" + t
     default:
-        err = errors.New(fmt.Sprintf("Can not deserialize %#v of type %T", t, t))
+        err = errors.New(fmt.Sprintf("Can not serialize %#v of type %T", t, t))
     }
     return result, err
 }
