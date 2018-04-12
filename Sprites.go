@@ -7,14 +7,21 @@ import (
 )
 
 type Sprite struct {
-    Frames  []*sdl.Texture
-    dimensionsHalved [][2]int32
+    frames  []*sdl.Texture
+    dimensions [][2]int32
     XCenter, YCenter int32
     Delays  []int32
-    timePassed int32
+    timerMode int32
+    timer int32
+    lastBlit int32
+    lastFrameCount int32
+    timerCarry bool
     FrameIndex int32
     layer int32
 }
+
+var USE_FRAME_COUNT int32 = 1
+var USE_TIME_PASSED int32 = 2
 
 var sprites []*Sprite
 
@@ -23,20 +30,26 @@ func NewSprite() (*Sprite, error) {
     //ensure sprite is the topmost of level 0
     sprites = append([]*Sprite{sprite}, sprites...)
     sprite.ChangeLayer(0)
+
+    timerMode, err := GetConf("spriteTimerMode"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.timerMode = int32(timerMode.(int))
+    timerCarry, err := GetConf("spriteTimerCarry"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.timerCarry = timerCarry.(bool)
     return sprite, nil
 }
 func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
     if (len(textures) != len(delays)) {return &Sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))}
 
+    var dimensions [][2]int32
     sprite, _ := NewSprite()
-
     for _, frame := range textures {
-        _, _, w, h, err := frame.Query();    if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine sprite dimensions")}
-        sprite.dimensionsHalved = append(sprite.dimensionsHalved, [2]int32{w >> 1, h >> 1})
+        _, _, w, h, err := frame.Query();    if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine texture size")}
+        dimensions = append(dimensions, [2]int32{w, h})
     }
 
-    sprite.Frames = textures
+    sprite.frames = textures
     sprite.Delays = delays
+    sprite.dimensions = dimensions
     return sprite, nil
 }
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
@@ -99,9 +112,35 @@ func (s *Sprite) ChangeLayer(layer int32) {
     }
 }
 
+//TODO: Make Conf Sprite Specific
 func (s *Sprite) Blit() error {
-    //Calculate topleft point from dimensions and center
-    destRect := sdl.Rect{s.XCenter - s.dimensionsHalved[s.FrameIndex][0], s.YCenter - s.dimensionsHalved[s.FrameIndex][1], s.dimensionsHalved[s.FrameIndex][0] << 1, s.dimensionsHalved[s.FrameIndex][1] << 1}
-    renderer.Copy(s.Frames[s.FrameIndex], nil, &destRect)
+    if s.timer >= s.Delays[s.FrameIndex] {
+        if s.timerCarry {
+            s.timer = s.timer - s.Delays[s.FrameIndex]
+        } else {
+            s.timer = 0
+        }
+        s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+    }
+
+    currentTime := int32(sdl.GetTicks())
+    if s.timerMode == USE_FRAME_COUNT {
+        s.timer += frameCount - s.lastFrameCount
+    } else if s.timerMode == USE_TIME_PASSED {
+        s.timer += currentTime - s.lastBlit
+    }
+    s.lastBlit = int32(currentTime)
+    s.lastFrameCount = frameCount
+
+    dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] >> 2), s.YCenter - (s.dimensions[s.FrameIndex][1] >> 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
+    renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect)
+    return nil
+}
+
+
+func BlitAll() error {
+    for _, sp := range sprites {
+        err := sp.Blit();    if err != nil {return errors.Wrap(err, "could not blit all sprites")}
+    }
     return nil
 }
