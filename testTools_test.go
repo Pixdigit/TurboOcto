@@ -19,16 +19,20 @@ func assert(success bool) error {
 func test(success bool, errMsg string, t *testing.T) {
     err := assert(success)
     if err != nil {
-        t.Error(errMsg)
+        wrapErr(err, errMsg, t)
     }
 }
 
 func testAgainstStrings(set func(s string)(error), get func()(string), errMsg string, t *testing.T) {
     for _, testString := range(testStrings) {
-        err := set(testString);    if err != nil {t.Error(errors.Wrap(err, "failed to set string"))}
+        err := set(testString);    if err != nil {wrapErr(err, "failed to set string", t)}
         //TODO: check for errs while getting
         result := get()
         errorMsg := errMsg + ": failed at string \"" + testString + "\"; is " + result
         test(result == testString, errorMsg, t)
     }
+}
+
+func wrapErr(err error, msg string, t *testing.T) {
+    t.Error(errors.Wrap(err, msg))
 }

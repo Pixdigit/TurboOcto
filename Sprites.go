@@ -15,7 +15,7 @@ type Sprite struct {
     timer int32
     lastBlit int32
     lastFrameCount int32
-    timerCarry bool
+    AllowFrameSkipping bool
     FrameIndex int32
     layer int32
 }
@@ -29,12 +29,12 @@ func NewSprite() (*Sprite, error) {
     sprite := &Sprite{}
     //ensure sprite is the topmost of level 0
     sprites = append([]*Sprite{sprite}, sprites...)
-    sprite.ChangeLayer(0)
+    err := sprite.ChangeLayer(0);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
 
-    timerMode, err := GetConf("spriteTimerMode"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    timerMode, err := GetConf("spriteTimerMode"); if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
     sprite.timerMode = int32(timerMode.(int))
-    timerCarry, err := GetConf("spriteTimerCarry"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-    sprite.timerCarry = timerCarry.(bool)
+    AllowFrameSkipping, err := GetConf("allowFrameSkipping"); if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
     return sprite, nil
 }
 func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
@@ -89,7 +89,7 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
 }
 
 
-func (s *Sprite) ChangeLayer(layer int32) {
+func (s *Sprite) ChangeLayer(layer int32) error {
     s.layer = layer
     for i := len(sprites) - 1; i >= 0 ; i-- {
         sp := sprites[i]
@@ -110,17 +110,20 @@ func (s *Sprite) ChangeLayer(layer int32) {
             break
         }
     }
+    return nil
 }
 
-//TODO: Make Conf Sprite Specific
 func (s *Sprite) Blit() error {
     if s.timer >= s.Delays[s.FrameIndex] {
-        if s.timerCarry {
-            s.timer = s.timer - s.Delays[s.FrameIndex]
+        if s.AllowFrameSkipping {
+            for s.timer > s.Delays[s.FrameIndex] {
+                s.timer = s.timer - s.Delays[s.FrameIndex]
+                s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+            }
         } else {
-            s.timer = 0
+            s.timer = s.timer - s.Delays[s.FrameIndex]
+            s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
         }
-        s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
     }
 
     currentTime := int32(sdl.GetTicks())
