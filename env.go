@@ -31,13 +31,13 @@ func initializeEnvironment() (err error) {
 func LoadDefaultConf() error {
     ok, err := pathExists("./conf/default.csv");    if err != nil {return errors.Wrap(err, "failed to check for default configuration")}
     if ok {
-        err := LoadConf("default");   if err != nil {return errors.Wrap(err, "could not load default configuration")}
+        err := LoadConf("default");    if err != nil {return errors.Wrap(err, "could not load default configuration")}
     } else {
         //Default Configuration
-        err := AddConf("updateOnRefresh", true);            if err != nil {return errors.Wrap(err, "could not set default configuration")}
-        err = AddConf("fullscreen", true);                  if err != nil {return errors.Wrap(err, "could not set default configuration")}
-        err = AddConf("spriteTimerCarry", true); if err != nil {return errors.Wrap(err, "could not set default configuration")}
-        err = AddConf("spriteTimerMode", USE_FRAME_COUNT); if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err := AddConf("updateOnRefresh", true);    if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("fullscreen", true);    if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("allowFrameSkipping", true);    if err != nil {return errors.Wrap(err, "could not set default configuration")}
+        err = AddConf("spriteTimerMode", USE_FRAME_COUNT);    if err != nil {return errors.Wrap(err, "could not set default configuration")}
     }
     return nil
 }

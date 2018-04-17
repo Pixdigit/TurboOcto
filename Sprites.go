@@ -15,7 +15,8 @@ type Sprite struct {
     timer int32
     lastBlit int32
     lastFrameCount int32
-    timerCarry bool
+    lastTimer int32
+    AllowFrameSkipping bool
     FrameIndex int32
     layer int32
 }
@@ -29,12 +30,15 @@ func NewSprite() (*Sprite, error) {
     sprite := &Sprite{}
     //ensure sprite is the topmost of level 0
     sprites = append([]*Sprite{sprite}, sprites...)
-    sprite.ChangeLayer(0)
+    err := sprite.ChangeLayer(0);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
 
-    timerMode, err := GetConf("spriteTimerMode"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    timerMode, err := GetConf("spriteTimerMode"); if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
     sprite.timerMode = int32(timerMode.(int))
-    timerCarry, err := GetConf("spriteTimerCarry"); if err != nil { return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-    sprite.timerCarry = timerCarry.(bool)
+    AllowFrameSkipping, err := GetConf("allowFrameSkipping"); if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+    sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
+
+    sprite.lastFrameCount = frameCount
+
     return sprite, nil
 }
 func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
@@ -89,7 +93,7 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
 }
 
 
-func (s *Sprite) ChangeLayer(layer int32) {
+func (s *Sprite) ChangeLayer(layer int32) error {
     s.layer = layer
     for i := len(sprites) - 1; i >= 0 ; i-- {
         sp := sprites[i]
@@ -110,19 +114,10 @@ func (s *Sprite) ChangeLayer(layer int32) {
             break
         }
     }
+    return nil
 }
 
-//TODO: Make Conf Sprite Specific
 func (s *Sprite) Blit() error {
-    if s.timer >= s.Delays[s.FrameIndex] {
-        if s.timerCarry {
-            s.timer = s.timer - s.Delays[s.FrameIndex]
-        } else {
-            s.timer = 0
-        }
-        s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
-    }
-
     currentTime := int32(sdl.GetTicks())
     if s.timerMode == USE_FRAME_COUNT {
         s.timer += frameCount - s.lastFrameCount
@@ -132,8 +127,25 @@ func (s *Sprite) Blit() error {
     s.lastBlit = int32(currentTime)
     s.lastFrameCount = frameCount
 
+    if s.timer >= s.Delays[s.FrameIndex] {
+        if s.AllowFrameSkipping {
+            for s.timer >= s.Delays[s.FrameIndex] {
+                s.timer = s.timer - s.Delays[s.FrameIndex]
+                s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+            }
+        } else {
+            s.timer = s.timer - s.Delays[s.FrameIndex]
+            //If we have no frame skipping ensure at least one blit
+            if s.timer > s.lastTimer {
+                s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+            }
+        }
+    }
+    s.lastTimer = s.timer
+
     dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] >> 2), s.YCenter - (s.dimensions[s.FrameIndex][1] >> 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
-    renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect)
+    err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);    if err != nil {return errors.Wrap(err, "could not copy sprite frame to renderer")}
+
     return nil
 }
 

@@ -2,7 +2,6 @@ package TurboOcto
 
 import (
     "github.com/veandco/go-sdl2/sdl"
-    "github.com/pkg/errors"
     "testing"
 )
 
@@ -15,7 +14,7 @@ func TestEventScaling(t *testing.T) {
         X: 1337,
         Y: 1337,
         State: sdl.PRESSED }
-    filtered, err := sdl.PushEvent(e);    if err != nil {t.Error(errors.Wrap(err, "could not push test event"))}
+    filtered, err := sdl.PushEvent(e);    if err != nil {wrapErr(err, "could not push test event", t)}
     test(!filtered, "test event was not pushed succesfully to the queue", t)
     Windowed(20, 20)
     UpdateEvents()
