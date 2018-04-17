@@ -21,24 +21,74 @@ func TestSpriteLayers(t *testing.T) {
 }
 
 func TestSpriteRendering(t *testing.T) {
-    err := SetConf("spriteTimerMode", USE_FRAME_COUNT);    if err != nil {wrapErr(err, "error while setting configuration", t)}
-    err = SetConf("allowFrameSkipping", false);    if err != nil {wrapErr(err, "error while setting configuration", t)}
-
     testTextures := make([]*sdl.Texture, 0)
-    for i := 0; i < 10; i++ {
+    for i := 0; i < 5; i++ {
         tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);    if err != nil {wrapErr(err, "error while creating test textures", t)}
         testTextures = append(testTextures, tex)
     }
+    dFrames := int32(0)
+    err := SetConf("spriteTimerMode", USE_FRAME_COUNT);    if err != nil {wrapErr(err, "error while setting configuration", t)}
 
-    sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 5, 0, 1, 1, 1, 1, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
 
-    for i := 0; i < 14; i++ {
-        sp.Blit()
-        print(sp.FrameIndex)
-        print("\n")
-        //TODO: adjust to delay array
-        //test(testTextures[i] == sp.frames[i], "sprite frame is not as expected (either pointer dref or something with FrameIndex)", t)
-        //test(sp.FrameIndex == int32(i), "FrameIndex has not been incremented", t)
+    err = SetConf("allowFrameSkipping", false);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 0, 0, 0, 0});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    frameCount = 0
+    sp.lastFrameCount = 0
+
+    for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
+    for i := int32(0); i < dFrames; i++ {
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
+        test(sp.FrameIndex == i, "FrameIndex mismatch without FrameSkip", t);
+        Present()
+    }
+
+
+    err = SetConf("allowFrameSkipping", true);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 1, 0, 1, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    expectedFrameIndexes := []int32{1, 3, 4}
+
+    for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
+    for i := int32(0); i < dFrames; i++ {
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
+        test(sp.FrameIndex == expectedFrameIndexes[int(i) % len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and singe blit frames", t);
+        Present()
+    }
+
+
+    err = SetConf("allowFrameSkipping", true);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 3, 0, 5, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    expectedFrameIndexes = []int32{1, 1, 1, 3, 3, 3, 3, 3, 4}
+
+    for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
+    for i := int32(0); i < dFrames; i++ {
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
+        test(sp.FrameIndex == expectedFrameIndexes[int(i) % len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and various delays", t);
+        Present()
+    }
+
+
+    err = SetConf("allowFrameSkipping", true);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, -2, 1, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    expectedFrameIndexes = []int32{0, 1}
+
+    for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
+    for i := int32(0); i < dFrames; i++ {
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
+        test(sp.FrameIndex == expectedFrameIndexes[int(i) % len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and unexpected delays", t);
+        Present()
+    }
+
+
+    err = SetConf("allowFrameSkipping", true);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 2, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    expectedFrameIndexes = []int32{0, 1, 3, 4, 1, 2, 3}
+
+    for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
+    for i := int32(0); i < dFrames; i++ {
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
+
+        test(sp.FrameIndex == expectedFrameIndexes[int(i) % len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and multiple present", t);
+        Present()
         Present()
     }
 
