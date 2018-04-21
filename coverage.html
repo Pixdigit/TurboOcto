@@ -1,0 +1,741 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/Pixdigit/TurboOcto/Events.go (71.4%)</option>
+				
+				<option value="file1">github.com/Pixdigit/TurboOcto/Screen.go (60.0%)</option>
+				
+				<option value="file2">github.com/Pixdigit/TurboOcto/Sprites.go (56.9%)</option>
+				
+				<option value="file3">github.com/Pixdigit/TurboOcto/TurboOcto.go (37.5%)</option>
+				
+				<option value="file4">github.com/Pixdigit/TurboOcto/env.go (69.9%)</option>
+				
+				<option value="file5">github.com/Pixdigit/TurboOcto/tools.go (83.3%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package TurboOcto
+
+import (
+    "github.com/veandco/go-sdl2/sdl"
+)
+
+type MouseState struct {
+    X, Y int32
+    XRel, YRel int32
+    Scrolled int32
+    ScrollRelative int32
+    ButtonsHeld []bool
+    ButtonsClicked []bool
+    ButtonsReleased []bool
+}
+
+var Mouse MouseState
+
+func init() <span class="cov8" title="1">{
+    Mouse = MouseState {
+        0, 0, 0, 0, 0, 0,
+        make([]bool, 3),
+        make([]bool, 3),
+        make([]bool, 3),
+    }
+}</span>
+
+func UpdateEvents() <span class="cov8" title="1">{
+    //Reset frame dependend variables
+    Mouse.XRel, Mouse.YRel = 0, 0
+    Mouse.ScrollRelative = 0
+    for i := range Mouse.ButtonsClicked </span><span class="cov8" title="1">{ Mouse.ButtonsClicked[i] = false }</span>
+    <span class="cov8" title="1">for i := range Mouse.ButtonsReleased </span><span class="cov8" title="1">{ Mouse.ButtonsReleased[i] = false }</span>
+
+    <span class="cov8" title="1">for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() </span><span class="cov8" title="1">{
+        switch e := event.(type) </span>{
+        case *sdl.MouseButtonEvent:<span class="cov8" title="1">
+            x, y := scalePoint(e.X, e.Y)
+            Mouse.X, Mouse.Y = x, y
+            if e.Type == sdl.MOUSEBUTTONDOWN </span><span class="cov8" title="1">{
+                switch e.Button </span>{
+                case sdl.BUTTON_LEFT:<span class="cov8" title="1">
+                    setMouseButtonState(1, true)</span>
+                case sdl.BUTTON_MIDDLE:<span class="cov8" title="1">
+                    setMouseButtonState(2, true)</span>
+                case sdl.BUTTON_RIGHT:<span class="cov0" title="0">
+                    setMouseButtonState(3, true)</span>
+                case sdl.BUTTON_X1:<span class="cov0" title="0">
+                    setMouseButtonState(4, true)</span>
+                case sdl.BUTTON_X2:<span class="cov0" title="0">
+                    setMouseButtonState(5, true)</span>
+                }
+            }<span class="cov8" title="1"> else if e.Type == sdl.MOUSEBUTTONUP </span><span class="cov8" title="1">{
+                switch e.Button </span>{
+                case sdl.BUTTON_LEFT:<span class="cov8" title="1">
+                    setMouseButtonState(1, false)</span>
+                case sdl.BUTTON_MIDDLE:<span class="cov0" title="0">
+                    setMouseButtonState(2, false)</span>
+                case sdl.BUTTON_RIGHT:<span class="cov0" title="0">
+                    setMouseButtonState(3, false)</span>
+                case sdl.BUTTON_X1:<span class="cov0" title="0">
+                    setMouseButtonState(4, false)</span>
+                case sdl.BUTTON_X2:<span class="cov0" title="0">
+                    setMouseButtonState(5, false)</span>
+                }
+            }
+        case *sdl.MouseMotionEvent:<span class="cov8" title="1">
+            //TODO: Change relative motion too
+            x, y := scalePoint(e.X, e.Y)
+            Mouse.X, Mouse.Y = x, y
+            Mouse.XRel, Mouse.YRel = e.XRel, e.YRel</span>
+        case *sdl.MouseWheelEvent:<span class="cov0" title="0">
+            x, y := scalePoint(e.X, e.Y)
+            Mouse.X, Mouse.Y = x, y
+            Mouse.ScrollRelative = e.X
+            Mouse.Scrolled += e.X</span>
+        }
+    }
+}
+func scalePoint(x, y int32) (int32, int32) <span class="cov8" title="1">{
+    if sizer == UNDERFIT_SCALE </span><span class="cov8" title="1">{
+        xScale := float64(drawWidth) / float64(screenWidth)
+        x = int32(float64(xOffset) + xScale * float64(x))
+        yScale := float64(drawHeight) / float64(screenHeight)
+        y = int32(float64(yOffset) + yScale * float64(y))
+    }</span>
+    <span class="cov8" title="1">return x, y</span>
+}
+func setMouseButtonState(buttonIndex int32, isDown bool) <span class="cov8" title="1">{
+    for len(Mouse.ButtonsClicked) - 1 &lt; int(buttonIndex) </span><span class="cov0" title="0">{
+        Mouse.ButtonsHeld = append(Mouse.ButtonsHeld, false)
+        Mouse.ButtonsClicked = append(Mouse.ButtonsClicked, false)
+        Mouse.ButtonsReleased = append(Mouse.ButtonsReleased, false)
+    }</span>
+
+    <span class="cov8" title="1">if Mouse.ButtonsHeld[buttonIndex] </span><span class="cov8" title="1">{
+        if !isDown </span><span class="cov8" title="1">{
+            Mouse.ButtonsReleased[buttonIndex] = true
+            Mouse.ButtonsHeld[buttonIndex] = false
+        }</span>
+    }<span class="cov8" title="1"> else {
+        if isDown </span><span class="cov8" title="1">{
+            Mouse.ButtonsClicked[buttonIndex] = true
+            Mouse.ButtonsHeld[buttonIndex] = true
+        }</span>
+    }
+}
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package TurboOcto
+
+import (
+    "github.com/veandco/go-sdl2/sdl"
+    "github.com/veandco/go-sdl2/img"
+    "github.com/pkg/errors"
+)
+
+
+type sizerType int32
+type scalerType int32
+
+var vWidth, vHeight int32
+var drawWidth, drawHeight int32
+var screenWidth, screenHeight int32
+var xOffset, yOffset int32
+var sizer sizerType
+var scaler scalerType
+var frameCount int32
+
+
+//TODO: implement all scales
+const UNDERFIT_SCALE sizerType = 0
+const OVERFIT_SCALE sizerType = 1
+const STRECH_SCALE sizerType = 2
+const FIX_SCALE sizerType = 3
+
+//TODO implement scaling methods
+const SIMPLE_SCALE scalerType = 1
+
+var renderer *sdl.Renderer
+var window *sdl.Window
+var displayIndex int //TODO: Dynamically update when window moved
+
+var rmask uint32 = 0x000000ff;
+var gmask uint32 = 0x0000ff00;
+var bmask uint32 = 0x00ff0000;
+var amask uint32 = 0xff000000;
+
+func initializeGraphics() (err error) <span class="cov8" title="1">{
+    //Default is LIL_ENDIAN
+    if sdl.BYTEORDER == sdl.BIG_ENDIAN </span><span class="cov0" title="0">{
+        rmask = 0xff000000;
+        gmask = 0x00ff0000;
+        bmask = 0x0000ff00;
+        amask = 0x000000ff;
+    }</span>
+
+    <span class="cov8" title="1">windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
+    window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not create window")}</span>
+
+    <span class="cov8" title="1">renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not create renderer")}</span>
+
+    <span class="cov8" title="1">displayIndex, err := window.GetDisplayIndex();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not get display index")}</span>
+    <span class="cov8" title="1">dmode, err := sdl.GetDesktopDisplayMode(displayIndex);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not get display mode")}</span>
+
+    <span class="cov8" title="1">screenWidth, screenHeight = dmode.W, dmode.H
+    drawWidth, drawHeight, err = renderer.GetOutputSize();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not read output size")}</span>
+    <span class="cov8" title="1">vWidth, vHeight = drawWidth, drawHeight
+
+    if ok, err := GetConf("fullscreen"); err != nil </span><span class="cov0" title="0">{ return errors.Wrap(err, "could not get fullscreen conf")
+    }</span><span class="cov8" title="1"> else if ok.(bool) </span><span class="cov8" title="1">{
+        Fullscreen()
+    }</span><span class="cov0" title="0"> else {
+        Windowed(screenWidth / 4, screenHeight / 4)
+    }</span>
+
+    <span class="cov8" title="1">Clear()
+    return nil</span>
+}
+
+func SetDecoration(title string, iconPath string) error <span class="cov8" title="1">{
+    window.SetTitle(title)
+    iconPath = "./assets/sprites/" + iconPath
+    if iconPath != "" </span><span class="cov8" title="1">{
+        if exists, err := pathExists(iconPath); err != nil </span><span class="cov0" title="0">{
+            return errors.Wrap(err, "could not check wether icon file exists")
+        }</span><span class="cov8" title="1"> else if !exists </span><span class="cov0" title="0">{
+            return errors.New("path to icon does not exist")
+        }</span><span class="cov8" title="1"> else {
+            icon, err := img.Load(iconPath);   if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not load icon from path")}</span>
+            <span class="cov8" title="1">window.SetIcon(icon)</span>
+        }
+    }
+    <span class="cov8" title="1">return nil</span>
+}
+
+func Fullscreen() <span class="cov8" title="1">{
+    window.SetSize(screenWidth, screenHeight)
+    window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
+    drawWidth, drawHeight = screenWidth, screenHeight
+    FillScreen(0, 0, 0, 0)
+    Clear()
+    SetConf("fullscreen", true)
+}</span>
+func Windowed(w, h int32) <span class="cov8" title="1">{
+    const SDL_WINDOW_WINDOWED = 0
+    window.SetFullscreen(SDL_WINDOW_WINDOWED)
+    window.SetSize(w, h)
+    drawWidth, drawHeight = w, h
+    window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
+    Clear()
+    SetConf("fullscreen", true)
+}</span>
+
+func SetSize(w, h int32) <span class="cov0" title="0">{
+    vWidth, vHeight = w, h
+    renderer.SetLogicalSize(vWidth, vHeight)
+}</span>
+func SetScaler(sizer sizerType, scaler scalerType) <span class="cov0" title="0">{
+    sizer = sizer
+    scaler = scaler
+    Clear()
+
+    switch sizer </span>{
+    case UNDERFIT_SCALE:<span class="cov0" title="0">
+        aspectRatioWindow := float64(screenWidth) / float64(screenHeight)
+        logicalAspectRatio := float64(vWidth) / float64(vHeight)
+        renderer.SetLogicalSize(vWidth, vHeight)
+        //More width than height
+        if logicalAspectRatio &gt; aspectRatioWindow </span><span class="cov0" title="0">{
+            //TODO: Implement test if offsets are correct
+            //window is too thin horizontally
+            drawHeight = int32(float64(screenWidth) / float64(vWidth) * float64(screenHeight))
+            drawWidth = screenWidth
+            xOffset = 0
+            yOffset = (screenHeight - drawHeight) / 2
+        }</span><span class="cov0" title="0"> else {
+            //window is too small vertically
+            drawHeight = screenHeight
+            drawWidth = int32(float64(screenHeight) / float64(vHeight) * float64(screenWidth))
+            xOffset = (screenWidth - drawWidth) / 2
+            yOffset = 0
+        }</span>
+    }
+}
+
+
+func FillScreen(r, g, b, a uint8) <span class="cov8" title="1">{
+    oldR, oldG, oldB, oldA, _ := renderer.GetDrawColor()
+    renderer.SetDrawColor(r, g, b, a)
+    renderer.FillRect(nil)
+    renderer.SetDrawColor(oldR, oldG, oldB, oldA)
+}</span>
+func Clear() <span class="cov8" title="1">{
+    FillScreen(0, 0, 0, 0)
+}</span>
+func Present() <span class="cov8" title="1">{
+    renderer.Present()
+    frameCount += 1
+}</span>
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package TurboOcto
+
+import (
+    "github.com/veandco/go-sdl2/sdl"
+    "github.com/veandco/go-sdl2/img"
+    "github.com/pkg/errors"
+)
+
+type Sprite struct {
+    frames  []*sdl.Texture
+    dimensions [][2]int32
+    XCenter, YCenter int32
+    Delays  []int32
+    timerMode int32
+    timer int32
+    lastBlit int32
+    lastFrameCount int32
+    lastTimer int32
+    AllowFrameSkipping bool
+    FrameIndex int32
+    layer int32
+}
+
+var USE_FRAME_COUNT int32 = 1
+var USE_TIME_PASSED int32 = 2
+
+var sprites []*Sprite
+
+func NewSprite() (*Sprite, error) <span class="cov8" title="1">{
+    sprite := &amp;Sprite{}
+    //ensure sprite is the topmost of level 0
+    sprites = append([]*Sprite{sprite}, sprites...)
+    err := sprite.ChangeLayer(0);    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}</span>
+
+    <span class="cov8" title="1">timerMode, err := GetConf("spriteTimerMode"); if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}</span>
+    <span class="cov8" title="1">sprite.timerMode = int32(timerMode.(int))
+    AllowFrameSkipping, err := GetConf("allowFrameSkipping"); if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}</span>
+    <span class="cov8" title="1">sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
+
+    sprite.lastFrameCount = frameCount
+
+    return sprite, nil</span>
+}
+func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) <span class="cov8" title="1">{
+    if (len(textures) != len(delays)) </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))}</span>
+
+    <span class="cov8" title="1">var dimensions [][2]int32
+    sprite, _ := NewSprite()
+    for _, frame := range textures </span><span class="cov8" title="1">{
+        _, _, w, h, err := frame.Query();    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not determine texture size")}</span>
+        <span class="cov8" title="1">dimensions = append(dimensions, [2]int32{w, h})</span>
+    }
+
+    <span class="cov8" title="1">sprite.frames = textures
+    sprite.Delays = delays
+    sprite.dimensions = dimensions
+    return sprite, nil</span>
+}
+func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) <span class="cov0" title="0">{
+    var textures []*sdl.Texture
+    for _, fileName := range fileNames </span><span class="cov0" title="0">{
+        texture, err := img.LoadTexture(renderer, "./assets/sprites/" + fileName);    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/" + fileName)}</span>
+        <span class="cov0" title="0">textures = append(textures, texture)</span>
+    }
+    <span class="cov0" title="0">return LoadAnimatedSpriteFromTextures(textures, delays)</span>
+}
+func LoadSpriteFromFile(filename string) (*Sprite, error) <span class="cov0" title="0">{
+    return LoadAnimatedSpriteFromFiles([]string{filename}, []int32{0})
+}</span>
+func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int32) (*Sprite, error) <span class="cov0" title="0">{
+    surface, err := img.Load(filename);    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not load sprite image")}</span>
+    <span class="cov0" title="0">if len(rects) == 0 </span><span class="cov0" title="0">{
+        //D == Amount of
+        DSprites := surface.W / surface.H
+        for i := int32(0); i &lt; DSprites; i++ </span><span class="cov0" title="0">{
+            rects = append(rects, sdl.Rect{i * surface.H, 0, surface.H, surface.H})
+        }</span>
+    }
+    <span class="cov0" title="0">var textures []*sdl.Texture
+    xOffset := int32(0)
+    for _, rect := range rects </span><span class="cov0" title="0">{
+        if rect.W == 0 || rect.H == 0 </span><span class="cov0" title="0">{
+            rect = sdl.Rect{0, 0, surface.H, surface.H}
+        }</span>
+        <span class="cov0" title="0">tmpSurface, err := sdl.CreateRGBSurface(0, rect.W, rect.H, 32, rmask, gmask, bmask, amask);    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not create tmpSurface for transfer")}</span>
+        <span class="cov0" title="0">rect.X += xOffset
+        xOffset += rect.W
+        surface.Blit(&amp;rect, tmpSurface, nil)
+        texture, err := renderer.CreateTextureFromSurface(tmpSurface);    if err != nil </span><span class="cov0" title="0">{return &amp;Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}</span>
+        <span class="cov0" title="0">textures = append(textures, texture)</span>
+    }
+    <span class="cov0" title="0">return LoadAnimatedSpriteFromTextures(textures, delays)</span>
+}
+
+
+func (s *Sprite) ChangeLayer(layer int32) error <span class="cov8" title="1">{
+    s.layer = layer
+    for i := len(sprites) - 1; i &gt;= 0 ; i-- </span><span class="cov8" title="1">{
+        sp := sprites[i]
+        if sp.layer &lt;= s.layer </span><span class="cov8" title="1">{
+            for i, sp := range sprites </span><span class="cov8" title="1">{
+                if s == sp </span><span class="cov8" title="1">{
+                    var newSprites []*Sprite
+                    newSprites = append(newSprites, sprites[:i]...)
+                    newSprites = append(newSprites, sprites[i + 1:]...)
+                    sprites = newSprites
+                }</span>
+            }
+            <span class="cov8" title="1">var newSprites []*Sprite
+            newSprites = append(newSprites, sprites[:i]...)
+            newSprites = append(newSprites, s)
+            newSprites = append(newSprites, sprites[i:]...)
+            sprites = newSprites
+            break</span>
+        }
+    }
+    <span class="cov8" title="1">return nil</span>
+}
+
+func (s *Sprite) Blit() error <span class="cov8" title="1">{
+    currentTime := int32(sdl.GetTicks())
+    if s.timerMode == USE_FRAME_COUNT </span><span class="cov8" title="1">{
+        s.timer += frameCount - s.lastFrameCount
+    }</span><span class="cov0" title="0"> else if s.timerMode == USE_TIME_PASSED </span><span class="cov0" title="0">{
+        s.timer += currentTime - s.lastBlit
+    }</span>
+    <span class="cov8" title="1">s.lastBlit = int32(currentTime)
+    s.lastFrameCount = frameCount
+
+    if s.timer &gt;= s.Delays[s.FrameIndex] </span><span class="cov8" title="1">{
+        if s.AllowFrameSkipping </span><span class="cov8" title="1">{
+            for s.timer &gt;= s.Delays[s.FrameIndex] </span><span class="cov8" title="1">{
+                s.timer = s.timer - s.Delays[s.FrameIndex]
+                s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+            }</span>
+        }<span class="cov8" title="1"> else {
+            s.timer = s.timer - s.Delays[s.FrameIndex]
+            //If we have no frame skipping ensure at least one blit
+            if s.timer &gt; s.lastTimer </span><span class="cov8" title="1">{
+                s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
+            }</span>
+        }
+    }
+    <span class="cov8" title="1">s.lastTimer = s.timer
+
+    dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] &gt;&gt; 2), s.YCenter - (s.dimensions[s.FrameIndex][1] &gt;&gt; 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
+    err := renderer.Copy(s.frames[s.FrameIndex], nil, &amp;dstRect);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not copy sprite frame to renderer")}</span>
+
+    <span class="cov8" title="1">return nil</span>
+}
+
+
+func BlitAll() error <span class="cov0" title="0">{
+    for _, sp := range sprites </span><span class="cov0" title="0">{
+        err := sp.Blit();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not blit all sprites")}</span>
+    }
+    <span class="cov0" title="0">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package TurboOcto
+
+import (
+    "github.com/veandco/go-sdl2/sdl"
+    "github.com/veandco/go-sdl2/img"
+    "github.com/pkg/errors"
+    "fmt"
+)
+
+func init() <span class="cov8" title="1">{
+    sdl.Init(sdl.INIT_EVERYTHING)
+    img.Init(0x0000000F)  // initialize all formats
+    err := initializeEnvironment();    if err != nil </span><span class="cov0" title="0">{fmt.Println(errors.Wrap(err, "could not initialize environment")); Quit()}</span>
+    <span class="cov8" title="1">err = initializeGraphics();    if err != nil </span><span class="cov0" title="0">{fmt.Println(errors.Wrap(err, "could not initialize graphics")); Quit()}</span>
+}
+
+func Update() <span class="cov0" title="0">{
+    Present()
+    UpdateEvents()
+}</span>
+
+func Quit() <span class="cov0" title="0">{
+    renderer.Destroy()
+    window.Destroy()
+    img.Quit()
+    sdl.Quit()
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package TurboOcto
+
+import (
+    "github.com/pkg/errors"
+    "fmt"
+    "strings"
+    "strconv"
+    "encoding/csv"
+    "os"
+)
+
+
+var conf map[string]string = map[string]string{}
+
+func initializeEnvironment() (err error) <span class="cov8" title="1">{
+
+    ok, err := pathExists("./conf");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not check for configuration")}</span>
+    <span class="cov8" title="1">if ok </span><span class="cov8" title="1">{
+        ok, err := pathExists("./conf/last.csv");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "failed to check for last configuration")}</span>
+        <span class="cov8" title="1">if ok </span><span class="cov0" title="0">{
+            err := LoadConf("last");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not load last configuration")}</span>
+        }<span class="cov8" title="1"> else {
+            err := LoadDefaultConf();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not initialize environment")}</span>
+        }
+    }<span class="cov0" title="0"> else {
+        err := LoadDefaultConf();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not initialize environment")}</span>
+    }
+
+    <span class="cov8" title="1">return nil</span>
+}
+func LoadDefaultConf() error <span class="cov8" title="1">{
+    ok, err := pathExists("./conf/default.csv");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "failed to check for default configuration")}</span>
+    <span class="cov8" title="1">if ok </span><span class="cov0" title="0">{
+        err := LoadConf("default");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not load default configuration")}</span>
+    }<span class="cov8" title="1"> else {
+        //Default Configuration
+        err := AddConf("updateOnRefresh", true);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not set default configuration")}</span>
+        <span class="cov8" title="1">err = AddConf("fullscreen", true);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not set default configuration")}</span>
+        <span class="cov8" title="1">err = AddConf("allowFrameSkipping", true);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not set default configuration")}</span>
+        <span class="cov8" title="1">err = AddConf("spriteTimerMode", USE_FRAME_COUNT);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not set default configuration")}</span>
+    }
+    <span class="cov8" title="1">return nil</span>
+}
+
+func serialize(variable interface{}) (string, error) <span class="cov8" title="1">{
+    var result string
+    var err error
+
+    switch t := variable.(type) </span>{
+    case bool:<span class="cov8" title="1">
+        if t </span><span class="cov8" title="1">{
+            result = "bool:true"
+        }</span><span class="cov8" title="1"> else {
+            result = "bool:false"
+        }</span>
+    case int32:<span class="cov8" title="1">
+        result = "int:" + strconv.Itoa(int(t))</span>
+    case int:<span class="cov8" title="1">
+        result = "int:" + strconv.Itoa(t)</span>
+    case float32:<span class="cov0" title="0">
+        result = "float:" + strconv.FormatFloat(float64(t), 'G', -1, 64)</span>
+    case float64:<span class="cov8" title="1">
+        result = "float:" + strconv.FormatFloat(t, 'G', -1, 64)</span>
+    case string:<span class="cov8" title="1">
+        result = "str:" + t</span>
+    default:<span class="cov0" title="0">
+        err = errors.New(fmt.Sprintf("Can not serialize %#v of type %T", t, t))</span>
+    }
+    <span class="cov8" title="1">return result, err</span>
+}
+
+func typeOfSerialized(s string) (string, error) <span class="cov8" title="1">{
+    if !strings.Contains(s, ":") </span><span class="cov0" title="0">{return "", errors.New("value is untyped")}</span>
+    <span class="cov8" title="1">return s[:strings.Index(s, ":")], nil</span>
+}
+
+func deserialize(raw string) (interface{}, error) <span class="cov8" title="1">{
+    var result interface{}
+    varType, err := typeOfSerialized(raw);    if err != nil </span><span class="cov0" title="0">{return nil, errors.Wrap(err, "could not deserialize \"" + raw + "\"")}</span>
+    <span class="cov8" title="1">varValue := raw[strings.Index(raw, ":") + 1:]
+
+    switch varType </span>{
+    case "bool":<span class="cov8" title="1">
+        if varValue == "true" </span><span class="cov8" title="1">{
+            result = true
+        }</span><span class="cov8" title="1"> else if varValue == "false" </span><span class="cov8" title="1">{
+            result = false
+        }</span><span class="cov0" title="0"> else {
+            err = errors.New("could not deserialize " + varValue + " as boolean")
+        }</span>
+    case "int":<span class="cov8" title="1">
+        result, err = strconv.Atoi(varValue)
+        errors.Wrap(err, "could not deserialize " + varValue + " as int")</span>
+    case "float":<span class="cov8" title="1">
+        result, err = strconv.ParseFloat(varValue, 64)
+        errors.Wrap(err, "could not deserialize " + varValue + " as float")</span>
+    case "str":<span class="cov8" title="1">
+        result = varValue</span>
+    default:<span class="cov0" title="0">
+        err = errors.New("unknown var type in deserialisation " + varType)</span>
+    }
+    <span class="cov8" title="1">return result, err</span>
+}
+
+func GetConf(confName string) (interface{}, error) <span class="cov8" title="1">{
+    config, ok := conf[confName]
+    if !ok </span><span class="cov0" title="0">{return nil, errors.New("configuration " + confName + " does not exist")}</span>
+    <span class="cov8" title="1">value, err := deserialize(config);    if err != nil </span><span class="cov0" title="0">{return nil, errors.New("invalid configuration value \"" + config + "\"")}</span>
+    <span class="cov8" title="1">return value, nil</span>
+}
+
+func SetConf(confName string, confValue interface{}) error <span class="cov8" title="1">{
+    config, ok := conf[confName]
+    if !ok </span><span class="cov0" title="0">{return errors.New("configuration " + confName + " does not exist")}</span>
+    <span class="cov8" title="1">newConfig, err := serialize(confValue);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not change configuration")}</span>
+    <span class="cov8" title="1">oldVarType, err := typeOfSerialized(config);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not check var type")}</span>
+    <span class="cov8" title="1">newVarType, err := typeOfSerialized(config);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not check var type")}</span>
+
+    <span class="cov8" title="1">if oldVarType != newVarType </span><span class="cov0" title="0">{return errors.New("configuration must have same type")}</span>
+    <span class="cov8" title="1">conf[confName] = newConfig
+    return nil</span>
+}
+
+func AddConf(confName string, initConfValue interface{}) error <span class="cov8" title="1">{
+    newConfig, err := serialize(initConfValue);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not serialize initial conf value")}</span>
+    <span class="cov8" title="1">conf[confName] = newConfig
+    return nil</span>
+}
+
+func DelConf(confName string) error <span class="cov0" title="0">{
+    //TODO
+    return nil
+}</span>
+
+func SaveConf(filename string) error <span class="cov8" title="1">{
+    var data [][]string
+    for k, v := range(conf) </span><span class="cov8" title="1">{
+        configuration := []string{k, v}
+        data = append(data, configuration)
+    }</span>
+
+    <span class="cov8" title="1">ok, err := pathExists("./conf/");    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not check wether conf folder exists")}</span>
+    <span class="cov8" title="1">if !ok </span><span class="cov0" title="0">{
+        err := os.Mkdir("./conf", os.ModePerm);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not create conf folder")}</span>
+    }
+
+    <span class="cov8" title="1">file, err := os.Create("./conf/" + filename + ".csv"); defer file.Close();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not open file " + filename + " to save configuration")}</span>
+    <span class="cov8" title="1">w := csv.NewWriter(file)
+        err = w.WriteAll(data);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not write configuration to file" + filename)}</span>
+
+    <span class="cov8" title="1">return nil</span>
+}
+
+func LoadConf(filename string) error <span class="cov8" title="1">{
+    file, err := os.Open("./conf/" + filename + ".csv"); defer file.Close();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not open file " + filename + " to load configuration")}</span>
+    <span class="cov8" title="1">r := csv.NewReader(file)
+    r.FieldsPerRecord = 2
+        data, err := r.ReadAll();    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not read configuration from file " + filename)}</span>
+
+    <span class="cov8" title="1">for _, configuration := range(data) </span><span class="cov8" title="1">{
+        //test if value can be deserialized == valid value
+        _, err := deserialize(configuration[1]);    if err != nil </span><span class="cov0" title="0">{return errors.Wrap(err, "could not load conf file \"" + filename + "\"")}</span>
+        <span class="cov8" title="1">conf[configuration[0]] = configuration[1]</span>
+    }
+
+    <span class="cov8" title="1">return nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package TurboOcto
+
+import "os"
+
+func pathExists(path string) (bool, error) <span class="cov8" title="1">{
+    _, err := os.Stat(path);    if err == nil </span><span class="cov8" title="1">{return true, nil}</span>
+    <span class="cov8" title="1">if os.IsNotExist(err) </span><span class="cov8" title="1">{return false, nil}</span>
+    <span class="cov0" title="0">return true, err</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>
