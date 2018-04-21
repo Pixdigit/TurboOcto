@@ -128,7 +128,8 @@ func AddConf(confName string, initConfValue interface{}) error {
 }
 
 func DelConf(confName string) error {
-    //TODO
+    _, ok := conf[confName];    if !ok {return errors.New("could not delete config: does not exist")}
+    delete(conf, confName)
     return nil
 }
 

@@ -51,4 +51,10 @@ func TestConfigurationSystem(t *testing.T) {
         confValueStr, err := serialize(confValue);    test(confValueStr == v, "configuration " + v + " is not equal to set value " + confValueStr, t)
     }
 
+    //should not exist
+    err = DelConf("sdfg");    if err == nil {wrapErr(err, "did not recieve error for deleting non existant conf", t)}
+    err = DelConf("test1");    if err != nil {wrapErr(err, "could not delete test conf value", t)}
+    _, ok := conf["test1"]
+    test(!ok, "conf still exists after deleting", t)
+
 }
