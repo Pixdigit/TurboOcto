@@ -6,11 +6,16 @@ import (
     "github.com/pkg/errors"
 )
 
+const STOPPED = 0;
+const RUNNING = 1;
+const PAUSED = 2;
+
 type Sprite struct {
     frames  []*sdl.Texture
     dimensions [][2]int32
     XCenter, YCenter int32
     Delays  []int32
+    animationStatus int32
     timerMode int32
     timer int32
     lastBlit int32
@@ -36,8 +41,8 @@ func NewSprite() (*Sprite, error) {
     sprite.timerMode = int32(timerMode.(int))
     AllowFrameSkipping, err := GetConf("allowFrameSkipping"); if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
     sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
-
     sprite.lastFrameCount = frameCount
+    sprite.animationStatus = RUNNING
 
     return sprite, nil
 }
@@ -119,10 +124,12 @@ func (s *Sprite) ChangeLayer(layer int32) error {
 
 func (s *Sprite) Blit() error {
     currentTime := int32(sdl.GetTicks())
-    if s.timerMode == USE_FRAME_COUNT {
-        s.timer += frameCount - s.lastFrameCount
-    } else if s.timerMode == USE_TIME_PASSED {
-        s.timer += currentTime - s.lastBlit
+    if s.animationStatus == RUNNING {
+        if s.timerMode == USE_FRAME_COUNT {
+            s.timer += frameCount - s.lastFrameCount
+        } else if s.timerMode == USE_TIME_PASSED {
+            s.timer += currentTime - s.lastBlit
+        }
     }
     s.lastBlit = int32(currentTime)
     s.lastFrameCount = frameCount
@@ -146,6 +153,23 @@ func (s *Sprite) Blit() error {
     dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] >> 2), s.YCenter - (s.dimensions[s.FrameIndex][1] >> 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
     err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);    if err != nil {return errors.Wrap(err, "could not copy sprite frame to renderer")}
 
+    return nil
+}
+
+func (s *Sprite) Start() error {
+    s.animationStatus = RUNNING
+    s.lastFrameCount = frameCount
+    s.lastBlit = int32(sdl.GetTicks())
+    return nil
+}
+func (s *Sprite) Stop() error {
+    s.FrameIndex = 0
+    s.timer = 0
+    s.animationStatus = STOPPED
+    return nil
+}
+func (s *Sprite) Pause() error {
+    s.animationStatus = PAUSED
     return nil
 }
 
