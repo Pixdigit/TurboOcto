@@ -37,8 +37,8 @@ func TestSpriteRendering(t *testing.T) {
 
     for _, v := range sp.Delays {if v == 0 {dFrames++} else {dFrames = dFrames + v}}
     for i := int32(0); i < dFrames; i++ {
-        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
         test(sp.FrameIndex == i, "FrameIndex mismatch without FrameSkip", t);
+        err = sp.Blit();    if err != nil {wrapErr(err, "could not blit sprite", t)}
         Present()
     }
 
@@ -120,8 +120,9 @@ func TestSpriteControl(t *testing.T) {
     test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
     //FIXME: why do I need to present twice
     Present()
-    Present()
+    //Present()
     sp.Blit()
     test(sp.FrameIndex == 1, "sprite did not start frameCount after stop", t)
+    Quit()
 
 }

@@ -4,7 +4,6 @@ import (
     "github.com/veandco/go-sdl2/sdl"
     "github.com/veandco/go-sdl2/img"
     "github.com/pkg/errors"
-    "fmt"
 )
 
 const STOPPED = 0;
@@ -124,8 +123,6 @@ func (s *Sprite) ChangeLayer(layer int32) error {
 }
 
 func (s *Sprite) Blit() error {
-    //TODO: DEBUG why s.timer becomes 2
-    fmt.Println(frameCount)
     currentTime := int32(sdl.GetTicks())
     if s.animationStatus == RUNNING {
         if s.timerMode == USE_FRAME_COUNT {
@@ -144,9 +141,9 @@ func (s *Sprite) Blit() error {
                 s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
             }
         } else {
-            s.timer = s.timer - s.Delays[s.FrameIndex]
             //If we have no frame skipping ensure at least one blit
-            if s.timer > s.lastTimer {
+            s.timer = s.timer - s.Delays[s.FrameIndex]
+            if s.timer > s.lastTimer || (s.FrameIndex == 0 && s.timer == 0) {
                 s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
             }
         }
@@ -163,6 +160,7 @@ func (s *Sprite) Start() error {
     s.animationStatus = RUNNING
     s.lastFrameCount = frameCount
     s.lastBlit = int32(sdl.GetTicks())
+    s.lastTimer = s.timer - 1
     return nil
 }
 func (s *Sprite) Stop() error {
