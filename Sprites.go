@@ -4,6 +4,7 @@ import (
     "github.com/veandco/go-sdl2/sdl"
     "github.com/veandco/go-sdl2/img"
     "github.com/pkg/errors"
+    "fmt"
 )
 
 const STOPPED = 0;
@@ -123,6 +124,8 @@ func (s *Sprite) ChangeLayer(layer int32) error {
 }
 
 func (s *Sprite) Blit() error {
+    //TODO: DEBUG why s.timer becomes 2
+    fmt.Println(frameCount)
     currentTime := int32(sdl.GetTicks())
     if s.animationStatus == RUNNING {
         if s.timerMode == USE_FRAME_COUNT {

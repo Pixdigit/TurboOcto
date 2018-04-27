@@ -37,6 +37,10 @@ var gmask uint32 = 0x0000ff00;
 var bmask uint32 = 0x00ff0000;
 var amask uint32 = 0xff000000;
 
+func GetRenderer() *sdl.Renderer {
+    return renderer
+}
+
 func initializeGraphics() (err error) {
     //Default is LIL_ENDIAN
     if sdl.BYTEORDER == sdl.BIG_ENDIAN {
