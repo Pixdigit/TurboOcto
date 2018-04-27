@@ -76,7 +76,6 @@ func SetDecoration(title string, iconPath string) error {
         if exists, err := pathExists(iconPath); err != nil {
             return errors.Wrap(err, "could not check wether icon file exists")
         } else if !exists {
-            print(iconPath + "\n")
             return errors.New("path to icon does not exist")
         } else {
             icon, err := img.Load(iconPath);   if err != nil {return errors.Wrap(err, "could not load icon from path")}

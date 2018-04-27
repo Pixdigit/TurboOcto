@@ -91,6 +91,37 @@ func TestSpriteRendering(t *testing.T) {
         Present()
         Present()
     }
+}
 
+func TestSpriteControl(t *testing.T) {
+    testTextures := make([]*sdl.Texture, 0)
+    for i := 0; i < 5; i++ {
+        tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);    if err != nil {wrapErr(err, "error while creating test textures", t)}
+        testTextures = append(testTextures, tex)
+    }
+    err := SetConf("spriteTimerMode", USE_FRAME_COUNT);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+    err = SetConf("allowFrameSkipping", false);    if err != nil {wrapErr(err, "error while setting configuration", t)}
+
+    sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, 1, 1, 1});    if err != nil {wrapErr(err, "could not create test sprite", t)}
+    sp.lastFrameCount = 0
+
+    Present()
+    sp.Blit()
+    sp.Pause()
+    Present()
+    Present()
+    Present()
+    sp.Blit()
+    test(sp.FrameIndex == 1, "pausing sprite did not halt frameCount", t)
+
+    sp.Stop()
+    sp.Start()
+    sp.Blit()
+    test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
+    //FIXME: why do I need to present twice
+    Present()
+    Present()
+    sp.Blit()
+    test(sp.FrameIndex == 1, "sprite did not start frameCount after stop", t)
 
 }
