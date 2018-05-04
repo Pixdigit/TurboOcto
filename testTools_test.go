@@ -23,11 +23,10 @@ func test(success bool, errMsg string, t *testing.T) {
     }
 }
 
-func testAgainstStrings(set func(s string)(error), get func()(string), errMsg string, t *testing.T) {
+func testAgainstStrings(set func(s string)(error), get func()(error, string), errMsg string, t *testing.T) {
     for _, testString := range(testStrings) {
         err := set(testString);    if err != nil {wrapErr(err, "failed to set string", t)}
-        //TODO: check for errs while getting
-        result := get()
+        err, result := get();    if err != nil {wrapErr(err, "failed to get string", t)}
         errorMsg := errMsg + ": failed at string \"" + testString + "\"; is " + result
         test(result == testString, errorMsg, t)
     }
