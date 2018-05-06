@@ -6,16 +6,12 @@ import (
     "github.com/pkg/errors"
 )
 
-const STOPPED = 0;
-const RUNNING = 1;
-const PAUSED = 2;
-
 type Sprite struct {
     frames  []*sdl.Texture
     dimensions [][2]int32
     XCenter, YCenter int32
     Delays  []int32
-    animationStatus int32
+    animationStatus Runlevel
     timerMode int32
     timer int32
     lastBlit int32
