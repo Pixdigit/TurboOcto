@@ -2,7 +2,6 @@ package TurboOcto
 
 import (
     "os"
-    "fmt"
 )
 
 type Runlevel int32
@@ -17,7 +16,6 @@ func pathExists(path string) (bool, error) {
 }
 
 func pushErr(errChan chan error, err error) {
-    fmt.Println("test4")
     go func() {
         errChan <- err
     }()

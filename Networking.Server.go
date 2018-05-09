@@ -3,10 +3,8 @@ package TurboOcto
 import (
 	"bufio"
 	"encoding/gob"
-	"fmt"
 	"io"
 	"net"
-
 	"github.com/pkg/errors"
 )
 
@@ -39,7 +37,6 @@ func (s *server) Start(errChan chan error) {
 	s.Continue()
 	s.listener, err = net.Listen(s.prototcol, s.address)
 	if err != nil {
-		fmt.Println("test1")
 		pushErr(errChan, errors.Wrap(err, "unable to listen on "+s.listener.Addr().String()))
 	}
 
@@ -55,7 +52,6 @@ func (s *server) acceptConnections(connChan chan net.Conn, errChan chan error) {
 		for s.state != STOPPED {
 			conn, err := s.listener.Accept()
 			if err != nil {
-				fmt.Println("test2")
 				pushErr(errChan, errors.Wrap(err, "failed accepting connection request"))
 			} else {
 				connChan <- conn
@@ -79,7 +75,7 @@ func (s *server) handleConnections(connChan chan net.Conn, errChan chan error) {
 		for s.state != STOPPED {
 			select {
 			case conn := <-connChan:
-				go s.handleConnection(conn, errChan)
+				s.handleConnection(conn, errChan)
 			default:
 				//Wait until state is running
 				for s.state == PAUSED {
@@ -91,24 +87,22 @@ func (s *server) handleConnections(connChan chan net.Conn, errChan chan error) {
 }
 
 func (s *server) handleConnection(conn net.Conn, errChan chan error) {
-	defer conn.Close()
-	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	for s.state != STOPPED {
-		for s.state == RUNNING {
-			dec := gob.NewDecoder(rw)
-			type dataForm struct{ Test string }
-			data := dataForm{Test: ""}
-			fmt.Println("test")
-			err := dec.Decode(&data)
-			fmt.Println(data)
-			fmt.Println(err)
-			if err != nil {
-				if err != io.EOF {
-					fmt.Println("test3")
-					pushErr(errChan, err)
+	go func() {
+		defer conn.Close()
+		rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+		for s.state != STOPPED {
+			for s.state == RUNNING {
+				dec := gob.NewDecoder(rw)
+				type dataForm struct{ Test string }
+				data := dataForm{Test: ""}
+				err := dec.Decode(&data)
+				if err != nil {
+					if err != io.EOF {
+						pushErr(errChan, err)
+					}
+					return
 				}
-				return
 			}
 		}
-	}
+	}()
 }
