@@ -64,7 +64,7 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*S
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
     var textures []*sdl.Texture
     for _, fileName := range fileNames {
-        texture, err := img.LoadTexture(renderer, "./assets/sprites/" + fileName);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/" + fileName)}
+        texture, err := img.LoadTexture(renderer, "./assets/sprites/" + fileName);    if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/" + fileName + "\"")}
         textures = append(textures, texture)
     }
     return LoadAnimatedSpriteFromTextures(textures, delays)
@@ -150,7 +150,7 @@ func (s *Sprite) Blit() error {
     }
     s.lastTimer = s.timer
 
-    dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] >> 2), s.YCenter - (s.dimensions[s.FrameIndex][1] >> 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
+    dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
     err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);    if err != nil {return errors.Wrap(err, "could not copy sprite frame to renderer")}
 
     return nil
