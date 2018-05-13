@@ -3,6 +3,7 @@ package turboOcto
 import (
 	"bufio"
 	"github.com/pkg/errors"
+	"fmt"
 	"net"
 )
 
@@ -104,7 +105,7 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 						token = []rune{}
 					}
 					//Token is of max length 2
-					if len(token) == 1 && token[0] != rune('/'){
+					if len(token) == 1 && token[0] != rune('/') {
 						//Single "character"
 						data += string(token[0])
 						token = []rune{}
@@ -114,6 +115,7 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 							token = []rune{rune('/')}
 						} else {
 							//Recieved single / as end statement
+							fmt.Println(data)
 							datArray = append(datArray, data)
 							data = ""
 							token = []rune{token[1]}
