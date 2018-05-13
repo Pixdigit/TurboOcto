@@ -1,4 +1,4 @@
-package TurboOcto
+package turboOcto
 
 import (
 	"fmt"
