@@ -1,4 +1,4 @@
-package TurboOcto
+package turboOcto
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
