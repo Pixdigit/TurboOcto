@@ -1,10 +1,11 @@
-package TurboOcto
+package turboOcto
 
 import (
 	"bufio"
-	"encoding/gob"
+	//"encoding/gob"
 	"github.com/pkg/errors"
-	"io"
+	//"io"
+	"fmt"
 	"net"
 )
 
@@ -89,18 +90,46 @@ func (s *server) handleConnections(connChan chan net.Conn, errChan chan error) {
 func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 	go func() {
 		defer conn.Close()
-		rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
+		r := bufio.NewReader(conn)
 		for s.state != STOPPED {
 			for s.state == RUNNING {
-				dec := gob.NewDecoder(rw)
-				type dataForm struct{ Test string }
-				data := dataForm{Test: ""}
-				err := dec.Decode(&data)
-				if err != nil {
-					if err != io.EOF {
-						pushErr(errChan, err)
+				//dec := gob.NewDecoder(rw)
+				//type dataForm struct{ Test string }
+				//data := dataForm{Test: ""}
+				//err := dec.Decode(&data)
+				var datArray []string
+				data := ""
+				var token []rune
+				for {
+					thisRune, _, _ := r.ReadRune()
+					//Token is of max length 2
+					token = append(token, thisRune)
+					if len(token) == 1 && token[0] != rune('/'){
+						data += string(token[0])
+						token = []rune{}
+					} else if len(token) == 2 && token[0] == rune('/') {
+						if token[0] == rune('/') && token[1] == rune('/') {
+							token = []rune{rune('/')}
+						} else {
+							//Recieved single / as end statement
+							datArray = append(datArray, data)
+							data = ""
+							fmt.Println("NEW")
+							for _, dat := range datArray {
+								fmt.Println(deserialize(dat))
+							}
+							token = []rune{token[1]}
+						}
+						data += string(token[0])
+						token = []rune{}
 					}
-					return
+
+					/*if err != nil {
+						if err != io.EOF {
+							pushErr(errChan, err)
+						}
+						return
+					}*/
 				}
 			}
 		}

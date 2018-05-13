@@ -1,18 +1,14 @@
-package TurboOcto
+package turboOcto
 
 import (
 	"bufio"
-	"encoding/gob"
 	"net"
 )
 
 func TestClient(address string) error {
 	conn, err := net.Dial("tcp", address);	if err != nil {return err}
 	rw := bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
-	type dataForm struct{ Test string }
-	data := dataForm{Test: "uiuiui"}
-	enc := gob.NewEncoder(rw)
-	err = enc.Encode(data);	if err != nil {return err}
+	rw.Write([]byte("str:äh/ int:8/ str://test/// "))
 	rw.Flush()
 	return nil
 }

@@ -77,6 +77,7 @@ func typeOfSerialized(s string) (string, error) {
 
 func deserialize(raw string) (interface{}, error) {
 	var result interface{}
+	raw = strings.TrimLeft(raw, " ")
 	varType, err := typeOfSerialized(raw);	if err != nil {return nil, errors.Wrap(err, "could not deserialize \""+raw+"\"")}
 	varValue := raw[strings.Index(raw, ":")+1:]
 
