@@ -8,6 +8,8 @@ import (
 )
 
 var protocols = [...]string{"tcp", "tcp4", "tcp6", "udp", "udp4", "udp6"}
+const ESCAPE_RUNE = rune('/')
+
 
 type server struct {
 	listener  net.Listener
@@ -105,14 +107,14 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 						token = []rune{}
 					}
 					//Token is of max length 2
-					if len(token) == 1 && token[0] != rune('/') {
+					if len(token) == 1 && token[0] != ESCAPE_RUNE {
 						//Single "character"
 						data += string(token[0])
 						token = []rune{}
-					} else if len(token) == 2 && token[0] == rune('/') {
-						if token[0] == rune('/') && token[1] == rune('/') {
+					} else if len(token) == 2 && token[0] == ESCAPE_RUNE {
+						if token[0] == ESCAPE_RUNE && token[1] == ESCAPE_RUNE {
 							//Escaped escape character
-							token = []rune{rune('/')}
+							token = []rune{ESCAPE_RUNE}
 						} else {
 							//Recieved single / as end statement
 							fmt.Println(data)
