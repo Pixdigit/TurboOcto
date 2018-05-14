@@ -2,23 +2,24 @@ package turboOcto
 
 import (
 	"bufio"
-	"fmt"
 	"github.com/pkg/errors"
-	"net"
 	"io"
+	"net"
 )
 
 var protocols = [...]string{"tcp", "tcp4", "tcp6", "udp", "udp4", "udp6"}
 
 const ESCAPE_RUNE = rune('/')
+
 //End Of Transmission
 const EOT_RUNE = rune('!')
 
 type server struct {
-	listener  net.Listener
-	prototcol string
-	address   string
-	state     Runlevel
+	listener     net.Listener
+	prototcol    string
+	incomingData chan map[string]string
+	address      string
+	state        Runlevel
 }
 
 func NewServer(address string, protocol string) (server, error) {
@@ -33,6 +34,7 @@ func NewServer(address string, protocol string) (server, error) {
 	if s.prototcol == "" {
 		return server{}, errors.New("unknown protocol \"" + protocol + "\"")
 	}
+	s.incomingData = make(chan map[string]string)
 	return s, nil
 }
 
@@ -49,6 +51,17 @@ func (s *server) Start(errChan chan error) {
 	s.acceptConnections(connChan, errChan)
 	s.handleConnections(connChan, errChan)
 
+}
+
+func (s *server) Recv() (string, string, bool) {
+	select {
+	case data := <-s.incomingData:
+		for k, v := range data {
+			return k, v, true
+		}
+	default:
+	}
+	return "", "", false
 }
 
 func (s *server) acceptConnections(connChan chan net.Conn, errChan chan error) {
@@ -101,7 +114,6 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 				key := ""
 				strData := ""
 				dataIsKey := true
-				data := make(map[string]string)
 				for {
 					thisRune, _, err := r.ReadRune()
 					token = append(token, thisRune)
@@ -116,10 +128,9 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 						token, strData, err = readTokenWithEscapeRune(token, strData, ESCAPE_RUNE)
 						if err != nil {
 							if err == io.EOF {
-								key = strData[:len(strData) - 1]
-								data[key] = ""
+								key = strData[:len(strData)-1]
 								//reset strData buffer to first rune of value strData
-								strData = string(strData[len(strData) - 1])
+								strData = string(strData[len(strData)-1])
 								dataIsKey = false
 							} else {
 								pushErr(errChan, err)
@@ -129,8 +140,9 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 						token, strData, err = readTokenWithEscapeRune(token, strData, EOT_RUNE)
 						if err != nil {
 							if err == io.EOF {
-								data[key] = strData
-								fmt.Println(data)
+								dataMap := make(map[string]string)
+								dataMap[key] = strData[:len(strData)-1]
+								go func() { s.incomingData <- dataMap }()
 								strData = ""
 								key = ""
 							} else {
@@ -145,8 +157,8 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 	}()
 }
 
-func readTokenWithEscapeRune(token []rune, data string, escapeRune rune) ([]rune, string, error){
-	var err error = nil;
+func readTokenWithEscapeRune(token []rune, data string, escapeRune rune) ([]rune, string, error) {
+	var err error = nil
 	if len(token) == 1 && token[0] != escapeRune {
 		//Single rune
 		data += string(token[0])

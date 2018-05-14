@@ -74,7 +74,9 @@ func typeOfSerialized(s string) (string, error) {
 	}
 	return s[:strings.Index(s, ":")], nil
 }
-
+func Deserialize(raw string) (interface{}, error) {
+	return deserialize(raw)
+}
 func deserialize(raw string) (interface{}, error) {
 	var result interface{}
 	raw = strings.TrimLeft(raw, " ")
