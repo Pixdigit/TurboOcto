@@ -2,14 +2,17 @@ package turboOcto
 
 import (
 	"bufio"
-	"github.com/pkg/errors"
 	"fmt"
+	"github.com/pkg/errors"
 	"net"
+	"io"
 )
 
 var protocols = [...]string{"tcp", "tcp4", "tcp6", "udp", "udp4", "udp6"}
-const ESCAPE_RUNE = rune('/')
 
+const ESCAPE_RUNE = rune('/')
+//End Of Transmission
+const EOT_RUNE = rune('!')
 
 type server struct {
 	listener  net.Listener
@@ -93,41 +96,81 @@ func (s *server) handleConnection(conn net.Conn, errChan chan error) {
 		r := bufio.NewReader(conn)
 		for s.state != STOPPED {
 			for s.state == RUNNING {
-				//one "character" or more if waiting for another /
+				//one "character" or more if waiting for another escape Rune
 				var token []rune
-				data := ""
-				var datArray []string
+				key := ""
+				strData := ""
+				dataIsKey := true
+				data := make(map[string]string)
 				for {
 					thisRune, _, err := r.ReadRune()
 					token = append(token, thisRune)
 					if err != nil {
 						//TODO: send notification of faulty msg to client
-						errChan <- err
-						data = ""
+						pushErr(errChan, err)
+						strData = ""
 						token = []rune{}
 					}
 					//Token is of max length 2
-					if len(token) == 1 && token[0] != ESCAPE_RUNE {
-						//Single "character"
-						data += string(token[0])
-						token = []rune{}
-					} else if len(token) == 2 && token[0] == ESCAPE_RUNE {
-						if token[0] == ESCAPE_RUNE && token[1] == ESCAPE_RUNE {
-							//Escaped escape character
-							token = []rune{ESCAPE_RUNE}
-						} else {
-							//Recieved single / as end statement
-							fmt.Println(data)
-							datArray = append(datArray, data)
-							data = ""
-							token = []rune{token[1]}
+					if dataIsKey {
+						token, strData, err = readTokenWithEscapeRune(token, strData, ESCAPE_RUNE)
+						if err != nil {
+							if err == io.EOF {
+								key = strData[:len(strData) - 1]
+								data[key] = ""
+								//reset strData buffer to first rune of value strData
+								strData = string(strData[len(strData) - 1])
+								dataIsKey = false
+							} else {
+								pushErr(errChan, err)
+							}
 						}
-						data += string(token[0])
-						token = []rune{}
+					} else {
+						token, strData, err = readTokenWithEscapeRune(token, strData, EOT_RUNE)
+						if err != nil {
+							if err == io.EOF {
+								data[key] = strData
+								fmt.Println(data)
+								strData = ""
+								key = ""
+							} else {
+								pushErr(errChan, err)
+							}
+							dataIsKey = true
+						}
 					}
-
 				}
 			}
 		}
 	}()
+}
+
+func readTokenWithEscapeRune(token []rune, data string, escapeRune rune) ([]rune, string, error){
+	var err error = nil;
+	if len(token) == 1 && token[0] != escapeRune {
+		//Single rune
+		data += string(token[0])
+		token = []rune{}
+
+	} else if len(token) == 2 && token[0] == escapeRune {
+		if token[0] == escapeRune && token[1] == escapeRune {
+			//Escaped escape rune
+			token = []rune{escapeRune}
+		} else {
+			//Recieved single escape rune as end statement
+			err = io.EOF
+			token = []rune{token[1]}
+		}
+		data += string(token[0])
+		token = []rune{}
+
+	} else {
+		//Token not correctly formatted
+		if len(token) > 2 || len(token) == 0 {
+			err = errors.New("token of unusable size")
+		} else if len(token) == 2 && token[0] != escapeRune {
+			err = errors.New("token longer than 1 but does not begin with escape rune")
+		}
+	}
+	return token, data, err
 }

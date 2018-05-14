@@ -33,18 +33,26 @@ func NewClient(address string, protocol string) (client, error) {
 	return c, nil
 }
 
-func (c *client) Send(data interface{}) error {
+func (c *client) Send(key string, data interface{}) error {
 	dataString, err := serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
-	sanitizedStr := ""
-	for _, char := range dataString {
-		if char == ESCAPE_RUNE {
-			sanitizedStr += string(ESCAPE_RUNE)
-		}
-		sanitizedStr += string(char)
-	}
+	sanitizedDataStr, err := sanitize(dataString, ESCAPE_RUNE, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize data")}
+	sanitizedKey, err := sanitize(key, ESCAPE_RUNE, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize key")}
 	//Append escape sequence
-	sanitizedStr = sanitizedStr + string(ESCAPE_RUNE) + " "
+	sanitizedStr := sanitizedKey + string(ESCAPE_RUNE) + sanitizedDataStr + string(EOT_RUNE) + " "
 	_, err = c.rw.Write([]byte(sanitizedStr));	if err != nil {return errors.Wrap(err, "unable to send data")}
 	err = c.rw.Flush();	if err != nil {return errors.Wrap(err, "unable to send data")}
 	return nil
+}
+
+func sanitize(str string, escapeRunes ...rune) (string, error) {
+	sanitizedStr := ""
+	for _, char := range str {
+		for _, escapeRune := range escapeRunes {
+			if char == escapeRune {
+				sanitizedStr += string(escapeRune)
+			}
+		}
+		sanitizedStr += string(char)
+	}
+	return sanitizedStr, nil
 }
