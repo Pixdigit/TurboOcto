@@ -35,9 +35,16 @@ func NewClient(address string, protocol string) (client, error) {
 
 func (c *client) Send(data interface{}) error {
 	dataString, err := serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
+	sanitizedStr := ""
+	for _, char := range dataString {
+		if char == ESCAPE_RUNE {
+			sanitizedStr += string(ESCAPE_RUNE)
+		}
+		sanitizedStr += string(char)
+	}
 	//Append escape sequence
-	dataString = dataString + string(ESCAPE_RUNE) + " "
-	_, err = c.rw.Write([]byte(dataString));	if err != nil {return errors.Wrap(err, "unable to send data")}
+	sanitizedStr = sanitizedStr + string(ESCAPE_RUNE) + " "
+	_, err = c.rw.Write([]byte(sanitizedStr));	if err != nil {return errors.Wrap(err, "unable to send data")}
 	err = c.rw.Flush();	if err != nil {return errors.Wrap(err, "unable to send data")}
 	return nil
 }
