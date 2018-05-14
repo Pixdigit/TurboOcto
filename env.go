@@ -3,10 +3,11 @@ package turboOcto
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var conf map[string]string = map[string]string{}

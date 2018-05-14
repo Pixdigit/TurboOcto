@@ -1,8 +1,9 @@
 package turboOcto
 
 import (
-	"github.com/veandco/go-sdl2/sdl"
 	"testing"
+
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 func TestScreen(t *testing.T) {

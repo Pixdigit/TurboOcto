@@ -2,8 +2,9 @@ package turboOcto
 
 import (
 	"bufio"
-	"github.com/pkg/errors"
 	"net"
+
+	"github.com/pkg/errors"
 )
 
 type client struct {

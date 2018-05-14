@@ -2,9 +2,10 @@ package turboOcto
 
 import (
 	"bufio"
-	"github.com/pkg/errors"
 	"io"
 	"net"
+
+	"github.com/pkg/errors"
 )
 
 var protocols = [...]string{"tcp", "tcp4", "tcp6", "udp", "udp4", "udp6"}
