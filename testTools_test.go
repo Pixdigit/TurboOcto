@@ -6,7 +6,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-var testStrings []string = []string{"TEST", "ẞönDérZäíſĉh€Ń", "1234567890", "", "\n"}
+var testStrings []string = []string{"TEST", "ẞönDérZäíſĉh€Ń", "1234567890", "", "\n", "//\\/\\!\\//\n// \\ !! ! "}
 
 func assert(success bool) error {
 	if !success {

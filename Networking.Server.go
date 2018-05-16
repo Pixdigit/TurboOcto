@@ -57,6 +57,8 @@ func (s *server) Start(errChan chan error) {
 func (s *server) Recv() (string, string, bool) {
 	select {
 	case data := <-s.incomingData:
+		//Data only consists of one pair
+		//Just read out both variables
 		for k, v := range data {
 			return k, v, true
 		}

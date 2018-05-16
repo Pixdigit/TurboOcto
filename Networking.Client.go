@@ -36,8 +36,8 @@ func NewClient(address string, protocol string) (client, error) {
 
 func (c *client) Send(key string, data interface{}) error {
 	dataString, err := serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
-	sanitizedDataStr, err := sanitize(dataString, ESCAPE_RUNE, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize data")}
-	sanitizedKey, err := sanitize(key, ESCAPE_RUNE, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize key")}
+	sanitizedDataStr, err := sanitize(dataString, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize data")}
+	sanitizedKey, err := sanitize(key, ESCAPE_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize key")}
 	//Append escape sequence
 	sanitizedStr := sanitizedKey + string(ESCAPE_RUNE) + sanitizedDataStr + string(EOT_RUNE) + " "
 	_, err = c.rw.Write([]byte(sanitizedStr));	if err != nil {return errors.Wrap(err, "unable to send data")}
