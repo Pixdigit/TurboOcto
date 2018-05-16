@@ -8,11 +8,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-var protocols = [...]string{"tcp", "tcp4", "tcp6", "udp", "udp4", "udp6"}
+const TCP string = "tcp"
+const TCP4 string = "tcp4"
+const TCP6 string = "tcp6"
+const UPD string = "udp"
+const UPD4 string = "udp4"
+const UPD6 string = "udp6"
 
+var protocols = [...]string{TCP, TCP4, TCP6, UDP, UDP4, UDP6}
+
+//End of key indicator
 const ESCAPE_RUNE = rune('/')
 
-//End Of Transmission
+//End of value (and transmission) indicator
 const EOT_RUNE = rune('!')
 
 type server struct {
