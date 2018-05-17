@@ -1,11 +1,12 @@
 package turboOcto
 
 import (
-	"github.com/pkg/errors"
 	"testing"
+
+	"github.com/pkg/errors"
 )
 
-var testStrings []string = []string{"TEST", "ẞönDérZäíſĉh€Ń", "1234567890", "", "\n"}
+var testStrings []string = []string{"TEST", "ẞönDérZäíſĉh€Ń", "1234567890", "", "\n", "//\\/\\!\\//\n// \\ !! ! "}
 
 func assert(success bool) error {
 	if !success {
@@ -22,13 +23,13 @@ func test(success bool, errMsg string, t *testing.T) {
 	}
 }
 
-func testAgainstStrings(set func(s string) error, get func() (error, string), errMsg string, t *testing.T) {
+func testAgainstStrings(set func(s string) error, get func() (string, error), errMsg string, t *testing.T) {
 	for _, testString := range testStrings {
 		err := set(testString)
 		if err != nil {
 			wrapErr(err, "failed to set string", t)
 		}
-		err, result := get()
+		result, err := get()
 		if err != nil {
 			wrapErr(err, "failed to get string", t)
 		}

@@ -3,10 +3,11 @@ package turboOcto
 import (
 	"encoding/csv"
 	"fmt"
-	"github.com/pkg/errors"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 var conf map[string]string = map[string]string{}
@@ -74,9 +75,12 @@ func typeOfSerialized(s string) (string, error) {
 	}
 	return s[:strings.Index(s, ":")], nil
 }
-
+func Deserialize(raw string) (interface{}, error) {
+	return deserialize(raw)
+}
 func deserialize(raw string) (interface{}, error) {
 	var result interface{}
+	raw = strings.TrimLeft(raw, " ")
 	varType, err := typeOfSerialized(raw);	if err != nil {return nil, errors.Wrap(err, "could not deserialize \""+raw+"\"")}
 	varValue := raw[strings.Index(raw, ":")+1:]
 

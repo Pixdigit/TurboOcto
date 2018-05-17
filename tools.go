@@ -1,6 +1,14 @@
 package turboOcto
 
-import "os"
+import (
+	"os"
+)
+
+type Runlevel int32
+
+const STOPPED Runlevel = 0
+const RUNNING Runlevel = 1
+const PAUSED Runlevel = 2
 
 func pathExists(path string) (bool, error) {
 	_, err := os.Stat(path)
@@ -11,4 +19,10 @@ func pathExists(path string) (bool, error) {
 		return false, nil
 	}
 	return true, err
+}
+
+func pushErr(errChan chan error, err error) {
+	go func() {
+		errChan <- err
+	}()
 }
