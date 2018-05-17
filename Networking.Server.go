@@ -11,9 +11,9 @@ import (
 const TCP string = "tcp"
 const TCP4 string = "tcp4"
 const TCP6 string = "tcp6"
-const UPD string = "udp"
-const UPD4 string = "udp4"
-const UPD6 string = "udp6"
+const UDP string = "udp"
+const UDP4 string = "udp4"
+const UDP6 string = "udp6"
 
 var protocols = [...]string{TCP, TCP4, TCP6, UDP, UDP4, UDP6}
 
