@@ -31,11 +31,20 @@ func NewSprite() (*Sprite, error) {
 	sprite := &Sprite{}
 	//ensure sprite is the topmost of level 0
 	sprites = append([]*Sprite{sprite}, sprites...)
-	err := sprite.ChangeLayer(0);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
+	err := sprite.ChangeLayer(0)
+	if err != nil {
+		return &Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")
+	}
 
-	timerMode, err := GetConf("spriteTimerMode");	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+	timerMode, err := GetConf("spriteTimerMode")
+	if err != nil {
+		return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")
+	}
 	sprite.timerMode = int32(timerMode.(int))
-	AllowFrameSkipping, err := GetConf("allowFrameSkipping");	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+	AllowFrameSkipping, err := GetConf("allowFrameSkipping")
+	if err != nil {
+		return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")
+	}
 	sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
 	sprite.lastFrameCount = frameCount
 	sprite.animationStatus = RUNNING
@@ -50,7 +59,10 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*S
 	var dimensions [][2]int32
 	sprite, _ := NewSprite()
 	for _, frame := range textures {
-		_, _, w, h, err := frame.Query();	if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine texture size")}
+		_, _, w, h, err := frame.Query()
+		if err != nil {
+			return &Sprite{}, errors.Wrap(err, "could not determine texture size")
+		}
 		dimensions = append(dimensions, [2]int32{w, h})
 	}
 
@@ -62,7 +74,10 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*S
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
 	var textures []*sdl.Texture
 	for _, fileName := range fileNames {
-		texture, err := img.LoadTexture(renderer, "./assets/sprites/"+fileName);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/"+fileName+"\"")}
+		texture, err := img.LoadTexture(renderer, "./assets/sprites/"+fileName)
+		if err != nil {
+			return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/"+fileName+"\"")
+		}
 		textures = append(textures, texture)
 	}
 	return LoadAnimatedSpriteFromTextures(textures, delays)
@@ -71,7 +86,10 @@ func LoadSpriteFromFile(filename string) (*Sprite, error) {
 	return LoadAnimatedSpriteFromFiles([]string{filename}, []int32{0})
 }
 func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int32) (*Sprite, error) {
-	surface, err := img.Load(filename);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite image")}
+	surface, err := img.Load(filename)
+	if err != nil {
+		return &Sprite{}, errors.Wrap(err, "could not load sprite image")
+	}
 	if len(rects) == 0 {
 		//D == Amount of
 		DSprites := surface.W / surface.H
@@ -85,11 +103,17 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
 		if rect.W == 0 || rect.H == 0 {
 			rect = sdl.Rect{0, 0, surface.H, surface.H}
 		}
-		tmpSurface, err := sdl.CreateRGBSurface(0, rect.W, rect.H, 32, rmask, gmask, bmask, amask);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not create tmpSurface for transfer")}
+		tmpSurface, err := sdl.CreateRGBSurface(0, rect.W, rect.H, 32, rmask, gmask, bmask, amask)
+		if err != nil {
+			return &Sprite{}, errors.Wrap(err, "could not create tmpSurface for transfer")
+		}
 		rect.X += xOffset
 		xOffset += rect.W
 		surface.Blit(&rect, tmpSurface, nil)
-		texture, err := renderer.CreateTextureFromSurface(tmpSurface);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}
+		texture, err := renderer.CreateTextureFromSurface(tmpSurface)
+		if err != nil {
+			return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")
+		}
 		textures = append(textures, texture)
 	}
 	return LoadAnimatedSpriteFromTextures(textures, delays)
@@ -148,7 +172,10 @@ func (s *Sprite) Blit() error {
 	s.lastTimer = s.timer
 
 	dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
-	err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to renderer")}
+	err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect)
+	if err != nil {
+		return errors.Wrap(err, "could not copy sprite frame to renderer")
+	}
 
 	return nil
 }
@@ -173,7 +200,10 @@ func (s *Sprite) Pause() error {
 
 func BlitAll() error {
 	for _, sp := range sprites {
-		err := sp.Blit();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
+		err := sp.Blit()
+		if err != nil {
+			return errors.Wrap(err, "could not blit all sprites")
+		}
 	}
 	return nil
 }

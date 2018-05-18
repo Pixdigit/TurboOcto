@@ -40,6 +40,9 @@ func TestSpriteLayers(t *testing.T) {
 }
 
 func TestSpriteRendering(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 	testTextures := make([]*sdl.Texture, 0)
 	for i := 0; i < 5; i++ {
 		tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
@@ -189,6 +192,9 @@ func TestSpriteRendering(t *testing.T) {
 }
 
 func TestSpriteControl(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 	testTextures := make([]*sdl.Texture, 0)
 	for i := 0; i < 5; i++ {
 		tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)

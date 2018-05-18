@@ -2,26 +2,27 @@ package turboOcto
 
 import (
 	"testing"
-
-	"github.com/veandco/go-sdl2/sdl"
 )
 
 func TestScreen(t *testing.T) {
-	testDelay := uint32(30)
+	if testing.Short() {
+		t.SkipNow()
+	}
 	testAgainstStrings(
 		func(s string) error { return SetDecoration(s, "../../testEnv/testIcon.png") },
 		func() (string, error) { s := window.GetTitle(); return s, nil },
 		"window title not set properly", t)
-	sdl.Delay(testDelay)
 	Windowed(500, 500)
 	x, y := window.GetSize()
 	test((x == 500 && y == 500), "window has not changed resolution correctly", t)
-	sdl.Delay(testDelay)
 	Fullscreen()
 	//TODO: Implement test. SDL has no GetFullscreen
 }
 
 func TestRenderer(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
 	/*pixelFormat, _ := window.GetPixelFormat() //TODO: CHeck out error
 
 	  testPixels := func (r, g, b, a uint8) {

@@ -49,15 +49,30 @@ func initializeGraphics() (err error) {
 	}
 
 	windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
-	window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);	if err != nil {return errors.Wrap(err, "could not create window")}
+	window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags)
+	if err != nil {
+		return errors.Wrap(err, "could not create window")
+	}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);	if err != nil {return errors.Wrap(err, "could not create renderer")}
+	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC)
+	if err != nil {
+		return errors.Wrap(err, "could not create renderer")
+	}
 
-	displayIndex, err := window.GetDisplayIndex();	if err != nil {return errors.Wrap(err, "could not get display index")}
-	dmode, err := sdl.GetDesktopDisplayMode(displayIndex);	if err != nil {return errors.Wrap(err, "could not get display mode")}
+	displayIndex, err := window.GetDisplayIndex()
+	if err != nil {
+		return errors.Wrap(err, "could not get display index")
+	}
+	dmode, err := sdl.GetDesktopDisplayMode(displayIndex)
+	if err != nil {
+		return errors.Wrap(err, "could not get display mode")
+	}
 
 	screenWidth, screenHeight = dmode.W, dmode.H
-	drawWidth, drawHeight, err = renderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
+	drawWidth, drawHeight, err = renderer.GetOutputSize()
+	if err != nil {
+		return errors.Wrap(err, "could not read output size")
+	}
 	vWidth, vHeight = drawWidth, drawHeight
 
 	if ok, err := GetConf("fullscreen"); err != nil {
@@ -81,7 +96,10 @@ func SetDecoration(title string, iconPath string) error {
 		} else if !exists {
 			return errors.New("path to icon does not exist")
 		} else {
-			icon, err := img.Load(iconPath);	if err != nil {return errors.Wrap(err, "could not load icon from path")}
+			icon, err := img.Load(iconPath)
+			if err != nil {
+				return errors.Wrap(err, "could not load icon from path")
+			}
 			window.SetIcon(icon)
 		}
 	}

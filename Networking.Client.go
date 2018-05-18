@@ -29,19 +29,37 @@ func NewClient(address string, protocol string) (client, error) {
 	if c.protocol == "" {
 		return client{}, errors.New("unknown protocol \"" + protocol + "\"")
 	}
-	conn, err := net.Dial(c.protocol, c.serverAddress);	if err != nil {return client{}, err}
+	conn, err := net.Dial(c.protocol, c.serverAddress)
+	if err != nil {
+		return client{}, err
+	}
 	c.rw = bufio.NewReadWriter(bufio.NewReader(conn), bufio.NewWriter(conn))
 	return c, nil
 }
 
 func (c *client) Send(key string, data interface{}) error {
-	dataString, err := serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
-	sanitizedDataStr, err := sanitize(dataString, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize data")}
-	sanitizedKey, err := sanitize(key, ESCAPE_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize key")}
+	dataString, err := serialize(data)
+	if err != nil {
+		return errors.Wrap(err, "unable to send data")
+	}
+	sanitizedDataStr, err := sanitize(dataString, EOT_RUNE)
+	if err != nil {
+		return errors.Wrap(err, "could not sanitize data")
+	}
+	sanitizedKey, err := sanitize(key, ESCAPE_RUNE)
+	if err != nil {
+		return errors.Wrap(err, "could not sanitize key")
+	}
 	//Append escape sequence
 	sanitizedStr := sanitizedKey + string(ESCAPE_RUNE) + sanitizedDataStr + string(EOT_RUNE) + " "
-	_, err = c.rw.Write([]byte(sanitizedStr));	if err != nil {return errors.Wrap(err, "unable to send data")}
-	err = c.rw.Flush();	if err != nil {return errors.Wrap(err, "unable to send data")}
+	_, err = c.rw.Write([]byte(sanitizedStr))
+	if err != nil {
+		return errors.Wrap(err, "unable to send data")
+	}
+	err = c.rw.Flush()
+	if err != nil {
+		return errors.Wrap(err, "unable to send data")
+	}
 	return nil
 }
 
