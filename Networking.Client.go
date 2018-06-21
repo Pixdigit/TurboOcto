@@ -5,6 +5,7 @@ import (
 	"net"
 
 	"github.com/pkg/errors"
+	"gitlab.com/Pixdigit/simpleSerialization"
 )
 
 type client struct {
@@ -35,7 +36,7 @@ func NewClient(address string, protocol string) (client, error) {
 }
 
 func (c *client) Send(key string, data interface{}) error {
-	dataString, err := serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
+	dataString, err := simpleSerialization.Serialize(data);	if err != nil {return errors.Wrap(err, "unable to send data")}
 	sanitizedDataStr, err := sanitize(dataString, EOT_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize data")}
 	sanitizedKey, err := sanitize(key, ESCAPE_RUNE);	if err != nil {return errors.Wrap(err, "could not sanitize key")}
 	//Append escape sequence

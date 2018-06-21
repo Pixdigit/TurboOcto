@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	tools "gitlab.com/Pixdigit/goTestTools"
+	"gitlab.com/Pixdigit/simpleSerialization"
 )
 
 func TestSerialization(t *testing.T) {
@@ -17,11 +18,11 @@ func TestSerialization(t *testing.T) {
 	}
 
 	for _, v := range testVars {
-		enc, err := serialize(v)
+		enc, err := simpleSerialization.Serialize(v)
 		if err != nil {
 			tools.WrapErr(err, "error while serializing", t)
 		} else {
-			dec, err := deserialize(enc)
+			dec, err := simpleSerialization.Deserialize(enc)
 			if err != nil {
 				tools.WrapErr(err, "error while deserializing", t)
 			} else {
@@ -69,7 +70,7 @@ func TestConfigurationSystem(t *testing.T) {
 		if err != nil {
 			tools.WrapErr(err, "could not read back configuration \""+k+"\"", t)
 		}
-		confValueStr, err := serialize(confValue)
+		confValueStr, err := simpleSerialization.Serialize(confValue)
 		tools.Test(confValueStr == v, "configuration "+v+" is not equal to set value "+confValueStr, t)
 	}
 

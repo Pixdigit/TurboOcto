@@ -2,12 +2,10 @@ package turboOcto
 
 import (
 	"encoding/csv"
-	"fmt"
 	"os"
-	"strconv"
-	"strings"
 
 	"github.com/pkg/errors"
+	"gitlab.com/Pixdigit/simpleSerialization"
 )
 
 var conf map[string]string = map[string]string{}
@@ -42,77 +40,12 @@ func LoadDefaultConf() error {
 	return nil
 }
 
-func serialize(variable interface{}) (string, error) {
-	var result string
-	var err error
-
-	switch t := variable.(type) {
-	case bool:
-		if t {
-			result = "bool:true"
-		} else {
-			result = "bool:false"
-		}
-	case int32:
-		result = "int:" + strconv.Itoa(int(t))
-	case int:
-		result = "int:" + strconv.Itoa(t)
-	case float32:
-		result = "float:" + strconv.FormatFloat(float64(t), 'G', -1, 64)
-	case float64:
-		result = "float:" + strconv.FormatFloat(t, 'G', -1, 64)
-	case string:
-		result = "str:" + t
-	default:
-		err = errors.New(fmt.Sprintf("Can not serialize %#v of type %T", t, t))
-	}
-	return result, err
-}
-
-func typeOfSerialized(s string) (string, error) {
-	if !strings.Contains(s, ":") {
-		return "", errors.New("value is untyped")
-	}
-	return s[:strings.Index(s, ":")], nil
-}
-func Deserialize(raw string) (interface{}, error) {
-	return deserialize(raw)
-}
-func deserialize(raw string) (interface{}, error) {
-	var result interface{}
-	raw = strings.TrimLeft(raw, " ")
-	varType, err := typeOfSerialized(raw);	if err != nil {return nil, errors.Wrap(err, "could not deserialize \""+raw+"\"")}
-	varValue := raw[strings.Index(raw, ":")+1:]
-
-	switch varType {
-	case "bool":
-		if varValue == "true" {
-			result = true
-		} else if varValue == "false" {
-			result = false
-		} else {
-			err = errors.New("could not deserialize " + varValue + " as boolean")
-		}
-	case "int":
-		result, err = strconv.Atoi(varValue)
-		errors.Wrap(err, "could not deserialize "+varValue+" as int")
-	case "float":
-		result, err = strconv.ParseFloat(varValue, 64)
-		errors.Wrap(err, "could not deserialize "+varValue+" as float")
-	case "str":
-		result = varValue
-	default:
-		err = errors.New("unknown var type in deserialisation " + varType)
-	}
-	return result, err
-}
-
 func GetConf(confName string) (interface{}, error) {
 	config, ok := conf[confName]
 	if !ok {
 		return nil, errors.New("configuration " + confName + " does not exist")
 	}
-	value, err := deserialize(config);	if err != nil {return nil, errors.New("invalid configuration value \"" + config + "\"")}
+	value, err := simpleSerialization.Deserialize(config);	if err != nil {return nil, errors.New("invalid configuration value \"" + config + "\"")}
 	return value, nil
 }
 
@@ -121,9 +54,9 @@ func SetConf(confName string, confValue interface{}) error {
 	if !ok {
 		return errors.New("configuration " + confName + " does not exist")
 	}
-	newConfig, err := serialize(confValue);	if err != nil {return errors.Wrap(err, "could not change configuration")}
-	oldVarType, err := typeOfSerialized(config);	if err != nil {return errors.Wrap(err, "could not check var type")}
-	newVarType, err := typeOfSerialized(config);	if err != nil {return errors.Wrap(err, "could not check var type")}
+	newConfig, err := simpleSerialization.Serialize(confValue);	if err != nil {return errors.Wrap(err, "could not change configuration")}
+	oldVarType, err := simpleSerialization.TypeOfSerialized(config);	if err != nil {return errors.Wrap(err, "could not check var type")}
+	newVarType, err := simpleSerialization.TypeOfSerialized(config);	if err != nil {return errors.Wrap(err, "could not check var type")}
 
 	if oldVarType != newVarType {
 		return errors.New("configuration must have same type")
@@ -133,7 +66,7 @@ func SetConf(confName string, confValue interface{}) error {
 }
 
 func AddConf(confName string, initConfValue interface{}) error {
-	newConfig, err := serialize(initConfValue);	if err != nil {return errors.Wrap(err, "could not serialize initial conf value")}
+	newConfig, err := simpleSerialization.Serialize(initConfValue);	if err != nil {return errors.Wrap(err, "could not simpleSerialization.Serialize initial conf value")}
 	conf[confName] = newConfig
 	return nil
 }
@@ -176,7 +109,7 @@ func LoadConf(filename string) error {
 
 	for _, configuration := range data {
 		//test if value can be deserialized == valid value
-		_, err := deserialize(configuration[1]);	if err != nil {return errors.Wrap(err, "could not load conf file \""+filename+"\"")}
+		_, err := simpleSerialization.Deserialize(configuration[1]);	if err != nil {return errors.Wrap(err, "could not load conf file \""+filename+"\"")}
 		conf[configuration[0]] = configuration[1]
 	}
 

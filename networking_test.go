@@ -5,6 +5,7 @@ import (
 	"time"
 
 	tools "gitlab.com/Pixdigit/goTestTools"
+	"gitlab.com/Pixdigit/simpleSerialization"
 )
 
 func TestNetworking(t *testing.T) {
@@ -40,7 +41,7 @@ func TestNetworking(t *testing.T) {
 		for !gotNew {
 			_, str, gotNew = s.Recv()
 		}
-		result, err := deserialize(str)
+		result, err := simpleSerialization.Deserialize(str)
 		if err != nil {
 			tools.WrapErr(err, "got invalid data", t)
 		}
