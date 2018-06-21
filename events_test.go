@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/veandco/go-sdl2/sdl"
+	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
 func TestEventScaling(t *testing.T) {
@@ -17,12 +18,12 @@ func TestEventScaling(t *testing.T) {
 		State:     sdl.PRESSED}
 	filtered, err := sdl.PushEvent(e)
 	if err != nil {
-		wrapErr(err, "could not push test event", t)
+		tools.WrapErr(err, "could not push test event", t)
 	}
-	test(!filtered, "test event was not pushed succesfully to the queue", t)
+	tools.Test(!filtered, "test event was not pushed succesfully to the queue", t)
 	Windowed(20, 20)
 	UpdateEvents()
-	test(Mouse.X < 20 && Mouse.X >= 0, "event handler did not scale input", t)
-	test(Mouse.X != 0, "mouse position did not change on mouse event", t)
+	tools.Test(Mouse.X < 20 && Mouse.X >= 0, "event handler did not scale input", t)
+	tools.Test(Mouse.X != 0, "mouse position did not change on mouse event", t)
 
 }

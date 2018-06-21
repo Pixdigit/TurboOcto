@@ -3,6 +3,8 @@ package turboOcto
 import (
 	"testing"
 	"time"
+
+	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
 func TestNetworking(t *testing.T) {
@@ -10,7 +12,7 @@ func TestNetworking(t *testing.T) {
 	protocol := "tcp"
 	s, err := NewServer(address, protocol)
 	if err != nil {
-		wrapErr(err, "could not start server", t)
+		tools.WrapErr(err, "could not start server", t)
 		t.FailNow()
 	}
 	end := time.After(100 * time.Millisecond)
@@ -21,15 +23,15 @@ func TestNetworking(t *testing.T) {
 
 	c, err := NewClient(address, protocol)
 	if err != nil {
-		wrapErr(err, "could not create client", t)
+		tools.WrapErr(err, "could not create client", t)
 		t.FailNow()
 	}
 
 	//TODO: test other data types
-	testAgainstStrings(func(str string) error {
+	tools.TestAgainstStrings(func(str string) error {
 		err := c.Send(str, str)
 		if err != nil {
-			wrapErr(err, "failed to send data \""+str+"\"", t)
+			tools.WrapErr(err, "failed to send data \""+str+"\"", t)
 		}
 		return nil
 	}, func() (string, error) {
@@ -40,7 +42,7 @@ func TestNetworking(t *testing.T) {
 		}
 		result, err := deserialize(str)
 		if err != nil {
-			wrapErr(err, "got invalid data", t)
+			tools.WrapErr(err, "got invalid data", t)
 		}
 		return result.(string), nil
 	}, "failure while data transfer", t)
@@ -50,7 +52,7 @@ func TestNetworking(t *testing.T) {
 		select {
 		case err := <-errChan:
 			if err != nil {
-				wrapErr(err, "error ", t)
+				tools.WrapErr(err, "error ", t)
 			} else {
 				t.Log("some function pushed error with value nil")
 			}
