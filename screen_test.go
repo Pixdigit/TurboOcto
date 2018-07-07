@@ -28,7 +28,7 @@ func TestRenderer(t *testing.T) {
 	  testPixels := func (r, g, b, a uint8) {
 	      var pixels unsafe.Pointer
 	      pitch := 100 //for this test pitch can be arbitrary
-	      renderer.ReadPixels(nil, pixelFormat, pixels, pitch)
+	      screenRenderer.ReadPixels(nil, pixelFormat, pixels, pitch)
 
 	      pixelsa := (*[]uint32)(pixels)
 	      for _, pixel := range(*pixelsa) {

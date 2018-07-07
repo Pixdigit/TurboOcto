@@ -26,7 +26,8 @@ const FIX_SCALE sizerType = 3
 //TODO implement scaling methods
 const SIMPLE_SCALE scalerType = 1
 
-var renderer *sdl.Renderer
+//TODO: rename
+var screenRenderer *sdl.Renderer
 var window *sdl.Window
 var displayIndex int //TODO: Dynamically update when window moved
 
@@ -35,8 +36,9 @@ var gmask uint32 = 0x0000ff00
 var bmask uint32 = 0x00ff0000
 var amask uint32 = 0xff000000
 
+//TODO: is this needed?
 func GetRenderer() *sdl.Renderer {
-	return renderer
+	return screenRenderer
 }
 
 func initializeGraphics() (err error) {
@@ -51,13 +53,13 @@ func initializeGraphics() (err error) {
 	windowFlags := uint32(sdl.WINDOW_SHOWN) | uint32(sdl.WINDOW_FULLSCREEN_DESKTOP)
 	window, err = sdl.CreateWindow("", sdl.WINDOWPOS_UNDEFINED, sdl.WINDOWPOS_UNDEFINED, 0, 0, windowFlags);	if err != nil {return errors.Wrap(err, "could not create window")}
 
-	renderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);	if err != nil {return errors.Wrap(err, "could not create renderer")}
+	screenRenderer, err = sdl.CreateRenderer(window, -1, sdl.RENDERER_PRESENTVSYNC);	if err != nil {return errors.Wrap(err, "could not create screenRenderer")}
 
 	displayIndex, err := window.GetDisplayIndex();	if err != nil {return errors.Wrap(err, "could not get display index")}
 	dmode, err := sdl.GetDesktopDisplayMode(displayIndex);	if err != nil {return errors.Wrap(err, "could not get display mode")}
 
 	screenWidth, screenHeight = dmode.W, dmode.H
-	drawWidth, drawHeight, err = renderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
+	drawWidth, drawHeight, err = screenRenderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
 	vWidth, vHeight = drawWidth, drawHeight
 
 	if ok, err := GetConf("fullscreen"); err != nil {
@@ -108,7 +110,7 @@ func Windowed(w, h int32) {
 
 func SetSize(w, h int32) {
 	vWidth, vHeight = w, h
-	renderer.SetLogicalSize(vWidth, vHeight)
+	screenRenderer.SetLogicalSize(vWidth, vHeight)
 }
 func SetScaler(sizer sizerType, scaler scalerType) {
 	sizer = sizer
@@ -119,7 +121,7 @@ func SetScaler(sizer sizerType, scaler scalerType) {
 	case UNDERFIT_SCALE:
 		aspectRatioWindow := float64(screenWidth) / float64(screenHeight)
 		logicalAspectRatio := float64(vWidth) / float64(vHeight)
-		renderer.SetLogicalSize(vWidth, vHeight)
+		screenRenderer.SetLogicalSize(vWidth, vHeight)
 		//More width than height
 		if logicalAspectRatio > aspectRatioWindow {
 			//TODO: Implement test if offsets are correct
@@ -139,15 +141,15 @@ func SetScaler(sizer sizerType, scaler scalerType) {
 }
 
 func FillScreen(r, g, b, a uint8) {
-	oldR, oldG, oldB, oldA, _ := renderer.GetDrawColor()
-	renderer.SetDrawColor(r, g, b, a)
-	renderer.FillRect(nil)
-	renderer.SetDrawColor(oldR, oldG, oldB, oldA)
+	oldR, oldG, oldB, oldA, _ := screenRenderer.GetDrawColor()
+	screenRenderer.SetDrawColor(r, g, b, a)
+	screenRenderer.FillRect(nil)
+	screenRenderer.SetDrawColor(oldR, oldG, oldB, oldA)
 }
 func Clear() {
 	FillScreen(0, 0, 0, 0)
 }
 func Present() {
-	renderer.Present()
+	screenRenderer.Present()
 	frameCount += 1
 }

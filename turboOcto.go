@@ -29,7 +29,7 @@ func Update() {
 }
 
 func Quit() {
-	renderer.Destroy()
+	screenRenderer.Destroy()
 	window.Destroy()
 	img.Quit()
 	sdl.Quit()

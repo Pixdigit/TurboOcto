@@ -43,7 +43,7 @@ func TestSpriteLayers(t *testing.T) {
 func TestSpriteRendering(t *testing.T) {
 	testTextures := make([]*sdl.Texture, 0)
 	for i := 0; i < 5; i++ {
-		tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
+		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
 		if err != nil {
 			tools.WrapErr(err, "error while creating test textures", t)
 		}
@@ -75,7 +75,7 @@ func TestSpriteRendering(t *testing.T) {
 	}
 	for i := int32(0); i < dFrames; i++ {
 		tools.Test(sp.FrameIndex == i, "FrameIndex mismatch without FrameSkip", t)
-		err = sp.Blit()
+		err = sp.IncrementTime()
 		if err != nil {
 			tools.WrapErr(err, "could not blit sprite", t)
 		}
@@ -100,7 +100,7 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := int32(0); i < dFrames; i++ {
-		err = sp.Blit()
+		err = sp.IncrementTime()
 		if err != nil {
 			tools.WrapErr(err, "could not blit sprite", t)
 		}
@@ -126,7 +126,7 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := int32(0); i < dFrames; i++ {
-		err = sp.Blit()
+		err = sp.IncrementTime()
 		if err != nil {
 			tools.WrapErr(err, "could not blit sprite", t)
 		}
@@ -152,7 +152,7 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := int32(0); i < dFrames; i++ {
-		err = sp.Blit()
+		err = sp.IncrementTime()
 		if err != nil {
 			tools.WrapErr(err, "could not blit sprite", t)
 		}
@@ -178,7 +178,7 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := int32(0); i < dFrames; i++ {
-		err = sp.Blit()
+		err = sp.IncrementTime()
 		if err != nil {
 			tools.WrapErr(err, "could not blit sprite", t)
 		}
@@ -192,7 +192,7 @@ func TestSpriteRendering(t *testing.T) {
 func TestSpriteControl(t *testing.T) {
 	testTextures := make([]*sdl.Texture, 0)
 	for i := 0; i < 5; i++ {
-		tex, err := renderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
+		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
 		if err != nil {
 			tools.WrapErr(err, "error while creating test textures", t)
 		}
@@ -214,22 +214,22 @@ func TestSpriteControl(t *testing.T) {
 	sp.lastFrameCount = 0
 
 	Present()
-	sp.Blit()
+	sp.IncrementTime()
 	sp.Pause()
 	Present()
 	Present()
 	Present()
-	sp.Blit()
+	sp.IncrementTime()
 	tools.Test(sp.FrameIndex == 1, "pausing sprite did not halt frameCount", t)
 
 	sp.Stop()
 	sp.Start()
-	sp.Blit()
+	sp.IncrementTime()
 	tools.Test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
 	//FIXME: why do I need to present twice
 	Present()
 	//Present()
-	sp.Blit()
+	sp.IncrementTime()
 	tools.Test(sp.FrameIndex == 1, "sprite did not start frameCount after stop", t)
 	Quit()
 

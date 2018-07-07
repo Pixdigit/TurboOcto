@@ -2,11 +2,10 @@ package turboOcto
 
 import (
 	"github.com/pkg/errors"
-	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-type Sprite struct {
+type sprite struct {
 	frames             []*sdl.Texture
 	dimensions         [][2]int32
 	XCenter, YCenter   int32
@@ -25,90 +24,38 @@ type Sprite struct {
 var USE_FRAME_COUNT int32 = 1
 var USE_TIME_PASSED int32 = 2
 
-var sprites []*Sprite
+var sprites []*sprite
 
-func NewSprite() (*Sprite, error) {
-	sprite := &Sprite{}
+func NewSprite() (*sprite, error) {
+	newSprite := &sprite{}
 	//ensure sprite is the topmost of level 0
-	sprites = append([]*Sprite{sprite}, sprites...)
-	err := sprite.ChangeLayer(0);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
+	sprites = append([]*sprite{newSprite}, sprites...)
+	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
 
-	timerMode, err := GetConf("spriteTimerMode");	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-	sprite.timerMode = int32(timerMode.(int))
-	AllowFrameSkipping, err := GetConf("allowFrameSkipping");	if err != nil {return &Sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-	sprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
-	sprite.lastFrameCount = frameCount
-	sprite.animationStatus = RUNNING
+	timerMode, err := GetConf("spriteTimerMode");	if err != nil {return &sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+	newSprite.timerMode = int32(timerMode.(int))
+	AllowFrameSkipping, err := GetConf("allowFrameSkipping");	if err != nil {return &sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
+	newSprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
+	newSprite.lastFrameCount = frameCount
+	newSprite.animationStatus = RUNNING
 
-	return sprite, nil
-}
-func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
-	if len(textures) != len(delays) {
-		return &Sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))
-	}
-
-	var dimensions [][2]int32
-	sprite, _ := NewSprite()
-	for _, frame := range textures {
-		_, _, w, h, err := frame.Query();	if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine texture size")}
-		dimensions = append(dimensions, [2]int32{w, h})
-	}
-
-	sprite.frames = textures
-	sprite.Delays = delays
-	sprite.dimensions = dimensions
-	return sprite, nil
-}
-func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
-	var textures []*sdl.Texture
-	for _, fileName := range fileNames {
-		texture, err := img.LoadTexture(renderer, "./assets/sprites/"+fileName);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/"+fileName+"\"")}
-		textures = append(textures, texture)
-	}
-	return LoadAnimatedSpriteFromTextures(textures, delays)
-}
-func LoadSpriteFromFile(filename string) (*Sprite, error) {
-	return LoadAnimatedSpriteFromFiles([]string{filename}, []int32{0})
-}
-func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int32) (*Sprite, error) {
-	surface, err := img.Load(filename);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load sprite image")}
-	if len(rects) == 0 {
-		//D == Amount of
-		DSprites := surface.W / surface.H
-		for i := int32(0); i < DSprites; i++ {
-			rects = append(rects, sdl.Rect{i * surface.H, 0, surface.H, surface.H})
-		}
-	}
-	var textures []*sdl.Texture
-	xOffset := int32(0)
-	for _, rect := range rects {
-		if rect.W == 0 || rect.H == 0 {
-			rect = sdl.Rect{0, 0, surface.H, surface.H}
-		}
-		tmpSurface, err := sdl.CreateRGBSurface(0, rect.W, rect.H, 32, rmask, gmask, bmask, amask);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not create tmpSurface for transfer")}
-		rect.X += xOffset
-		xOffset += rect.W
-		surface.Blit(&rect, tmpSurface, nil)
-		texture, err := renderer.CreateTextureFromSurface(tmpSurface);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}
-		textures = append(textures, texture)
-	}
-	return LoadAnimatedSpriteFromTextures(textures, delays)
+	return newSprite, nil
 }
 
-func (s *Sprite) ChangeLayer(layer int32) error {
+func (s *sprite) ChangeLayer(layer int32) error {
 	s.layer = layer
 	for i := len(sprites) - 1; i >= 0; i-- {
 		sp := sprites[i]
 		if sp.layer <= s.layer {
 			for i, sp := range sprites {
 				if s == sp {
-					var newSprites []*Sprite
+					var newSprites []*sprite
 					newSprites = append(newSprites, sprites[:i]...)
 					newSprites = append(newSprites, sprites[i+1:]...)
 					sprites = newSprites
 				}
 			}
-			var newSprites []*Sprite
+			var newSprites []*sprite
 			newSprites = append(newSprites, sprites[:i]...)
 			newSprites = append(newSprites, s)
 			newSprites = append(newSprites, sprites[i:]...)
@@ -119,7 +66,7 @@ func (s *Sprite) ChangeLayer(layer int32) error {
 	return nil
 }
 
-func (s *Sprite) Blit() error {
+func (s *sprite) IncrementTime() error {
 	currentTime := int32(sdl.GetTicks())
 	if s.animationStatus == RUNNING {
 		if s.timerMode == USE_FRAME_COUNT {
@@ -146,34 +93,53 @@ func (s *Sprite) Blit() error {
 		}
 	}
 	s.lastTimer = s.timer
+	return nil
+}
 
+func (s *sprite) BlitToScreen() error {
 	dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
-	err := renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to renderer")}
+	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
 
 	return nil
 }
 
-func (s *Sprite) Start() error {
+func (s *sprite) Blit(dstTexture *sdl.Texture) error {
+	dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
+	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
+	renderer.SetRenderTarget(dstTexture)
+	err = renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
+
+	return nil
+}
+
+func (s *sprite) Start() error {
 	s.animationStatus = RUNNING
 	s.lastFrameCount = frameCount
 	s.lastBlit = int32(sdl.GetTicks())
 	s.lastTimer = s.timer - 1
 	return nil
 }
-func (s *Sprite) Stop() error {
+func (s *sprite) Stop() error {
 	s.FrameIndex = 0
 	s.timer = 0
 	s.animationStatus = STOPPED
 	return nil
 }
-func (s *Sprite) Pause() error {
+func (s *sprite) Pause() error {
 	s.animationStatus = PAUSED
 	return nil
 }
 
-func BlitAll() error {
+func BlitAllToScreen() error {
 	for _, sp := range sprites {
-		err := sp.Blit();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
+		err := sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
+	}
+	return nil
+}
+
+func UpdateAll() error {
+	for _, sp := range sprites {
+		err := sp.IncrementTime();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
 	}
 	return nil
 }
