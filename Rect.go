@@ -155,6 +155,9 @@ func (r *Rect) GetAnchorPoint(fixPoint AnchorPoint) (Point, error) {
 
 	return Point{x, y}, nil
 }
+func (r *Rect) GetPosition() (Point, error) {
+	return r.GetAnchorPoint(r.FixPoint)
+}
 
 func (r *Rect) MoveTo(p Point) error {
 	newTopLeft, err := r.getTopLeftFromPoint(p);	if err != nil {return errors.Wrap(err, "could not calculate new rect position")}
@@ -165,4 +168,18 @@ func (r *Rect) MoveTo(p Point) error {
 func (r *Rect) MoveRelative(v Vector) error {
 	r.topLeftReference.Add(v)
 	return nil
+}
+
+//SetSize changes the size of the Rect in such a way, that the anchor will stay in place
+func (r *Rect) SetSize(s Size) error {
+    anchor, err := r.GetAnchorPoint(r.FixPoint)
+    if err != nil {
+        return errors.Wrap(err, "could not change size")
+    }
+    r.size = s
+    err = r.MoveTo(anchor)
+    if err != nil {
+        return errors.Wrap(err, "could not retain position in place after size change")
+    }
+    return nil
 }

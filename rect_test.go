@@ -17,12 +17,12 @@ func TestRectMovement(t *testing.T) {
 	r, _ := NewRect(Point{0, 0}, Size{50, 50}, AnchorPoint{LEFT, TOP})
 
 	r.FixPoint = AnchorPoint{RIGHT, BOTTOM}
-    err := r.MoveTo(Point{25, 25})
+	err := r.MoveTo(Point{25, 25})
 	if err != nil {
 		tools.WrapErr(err, "could not move Rect to Point", t)
 	}
-    err = r.MoveRelative(Vector{-25, -25})
-    if err != nil {
+	err = r.MoveRelative(Vector{-25, -25})
+	if err != nil {
 		tools.WrapErr(err, "could not move Rect relatively", t)
 	}
 
@@ -71,4 +71,12 @@ func TestRectIntersection(t *testing.T) {
 	}
 	tools.Test(ok, "intersections of two rects are not identical depending of order", t)
 
+}
+func TestRectSizeChange(t *testing.T) {
+	r, _ := NewRect(Point{0, 0}, Size{50, 50}, AnchorPoint{LEFT, TOP})
+    r.FixPoint = AnchorPoint{RIGHT, BOTTOM}
+    r.SetSize(Size{25, 25})
+    testPoint, _ := r.GetAnchorPoint(AnchorPoint{LEFT, TOP})
+    ok, _ := testPoint.Equals(Point{25, 25})
+    tools.Test(ok, "size did not change with position remaining in place", t)
 }
