@@ -1,8 +1,11 @@
 package turboOcto
 
+type Scalar float64
+
 type Point struct {
-	X, Y int32
+	X, Y Scalar
 }
+
 type Vector Point
 
 func (p *Point) Add(v Vector) error {

@@ -1,7 +1,7 @@
 package turboOcto
 
 type Size struct {
-	Width, Height int32
+	Width, Height Scalar
 }
 
 func (s *Size) AreaIsPositive() (bool, error) {

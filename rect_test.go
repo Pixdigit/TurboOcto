@@ -74,9 +74,9 @@ func TestRectIntersection(t *testing.T) {
 }
 func TestRectSizeChange(t *testing.T) {
 	r, _ := NewRect(Point{0, 0}, Size{50, 50}, AnchorPoint{LEFT, TOP})
-    r.FixPoint = AnchorPoint{RIGHT, BOTTOM}
-    r.SetSize(Size{25, 25})
-    testPoint, _ := r.GetAnchorPoint(AnchorPoint{LEFT, TOP})
-    ok, _ := testPoint.Equals(Point{25, 25})
-    tools.Test(ok, "size did not change with position remaining in place", t)
+	r.FixPoint = AnchorPoint{RIGHT, BOTTOM}
+	r.SetSize(Size{25, 25})
+	testPoint, _ := r.GetAnchorPoint(AnchorPoint{LEFT, TOP})
+	ok, _ := testPoint.Equals(Point{25, 25})
+	tools.Test(ok, "size did not change with position remaining in place", t)
 }

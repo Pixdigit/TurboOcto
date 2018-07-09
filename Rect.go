@@ -107,18 +107,18 @@ func (r *Rect) IntersectRect(r2 Rect) (Rect, bool, error) {
 		return Rect{}, false, nil
 	}
 
-	top, err := max(r.topLeftReference.Y, r2.topLeftReference.Y);	if err != nil {return Rect{}, false, err}
-	left, err := max(r.topLeftReference.X, r2.topLeftReference.X);	if err != nil {return Rect{}, false, err}
-	bottom, err := min(r.topLeftReference.Y+r.size.Height, r2.topLeftReference.Y+r2.size.Height);	if err != nil {return Rect{}, false, err}
-	right, err := min(r.topLeftReference.X+r.size.Width, r2.topLeftReference.X+r2.size.Width);	if err != nil {return Rect{}, false, err}
+	top := max(r.topLeftReference.Y, r2.topLeftReference.Y)
+	left := max(r.topLeftReference.X, r2.topLeftReference.X)
+	bottom := min(r.topLeftReference.Y+r.size.Height, r2.topLeftReference.Y+r2.size.Height)
+	right := min(r.topLeftReference.X+r.size.Width, r2.topLeftReference.X+r2.size.Width)
 
 	intersection, err := NewRect(Point{top, left}, Size{right - left, bottom - top}, AnchorPoint{LEFT, TOP});	if err != nil {return Rect{}, false, errors.Wrap(err, "could not get intersection")}
 
 	return *intersection, true, nil
 }
 
-func (r *Rect) GetAnchorPlane(pl interface{}) (int32, error) {
-	var scalar int32
+func (r *Rect) GetAnchorPlane(pl interface{}) (Scalar, error) {
+	var scalar Scalar
 
 	switch pl.(type) {
 	case xPlane:
@@ -172,14 +172,8 @@ func (r *Rect) MoveRelative(v Vector) error {
 
 //SetSize changes the size of the Rect in such a way, that the anchor will stay in place
 func (r *Rect) SetSize(s Size) error {
-    anchor, err := r.GetAnchorPoint(r.FixPoint)
-    if err != nil {
-        return errors.Wrap(err, "could not change size")
-    }
-    r.size = s
-    err = r.MoveTo(anchor)
-    if err != nil {
-        return errors.Wrap(err, "could not retain position in place after size change")
-    }
-    return nil
+	anchor, err := r.GetAnchorPoint(r.FixPoint);	if err != nil {return errors.Wrap(err, "could not change size")}
+	r.size = s
+	err = r.MoveTo(anchor);	if err != nil {return errors.Wrap(err, "could not retain position in place after size change")}
+	return nil
 }
