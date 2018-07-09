@@ -7,8 +7,8 @@ import (
 
 type sprite struct {
 	frames             []*sdl.Texture
-	dimensions         [][2]int32
-	XCenter, YCenter   int32
+	dimensions         []Size
+	rect               *Rect
 	Delays             []int32
 	animationStatus    Runlevel
 	timerMode          int32
@@ -21,8 +21,10 @@ type sprite struct {
 	layer              int32
 }
 
-var USE_FRAME_COUNT int32 = 1
-var USE_TIME_PASSED int32 = 2
+const (
+	USE_FRAME_COUNT = iota
+	USE_TIME_PASSED
+)
 
 var sprites []*sprite
 
@@ -38,6 +40,7 @@ func NewSprite() (*sprite, error) {
 	newSprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
 	newSprite.lastFrameCount = frameCount
 	newSprite.animationStatus = RUNNING
+	newSprite.rect, err = NewRect(Point{0, 0}, Size{0, 0}, AnchorPoint{CENTERX, CENTERY});	if err != nil {return &sprite{}, errors.Wrap(err, "could not create bounding rect for sprite")}
 
 	return newSprite, nil
 }
@@ -97,18 +100,18 @@ func (s *sprite) IncrementTime() error {
 }
 
 func (s *sprite) BlitToScreen() error {
-	dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
-	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
-
+	err := s.rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
+	dstRect, err := s.rect.SDLRect();	if err != nil {return errors.Wrap(err, "could not convert sprite boundaries to SDL rect")}
+	err = screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
 	return nil
 }
 
 func (s *sprite) Blit(dstTexture *sdl.Texture) error {
-	dstRect := sdl.Rect{s.XCenter - (s.dimensions[s.FrameIndex][0] / 2), s.YCenter - (s.dimensions[s.FrameIndex][1] / 2), s.dimensions[s.FrameIndex][0], s.dimensions[s.FrameIndex][1]}
+	err := s.rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
+	dstRect, err := s.rect.SDLRect();	if err != nil {return errors.Wrap(err, "could not convert sprite boundaries to SDL rect")}
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
 	renderer.SetRenderTarget(dstTexture)
-	err = renderer.Copy(s.frames[s.FrameIndex], nil, &dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
-
+	err = renderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
 	return nil
 }
 

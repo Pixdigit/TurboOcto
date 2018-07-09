@@ -39,7 +39,7 @@ func TestRectMovement(t *testing.T) {
 	}
 
 	for aP, pTest := range expectedAnchors {
-		p, err := r.GetAnchorPoint(aP)
+		p, err := r.AnchorPosition(aP)
 		if err != nil {
 			tools.WrapErr(err, "could not get anchor point", t)
 		}
@@ -76,7 +76,7 @@ func TestRectSizeChange(t *testing.T) {
 	r, _ := NewRect(Point{0, 0}, Size{50, 50}, AnchorPoint{LEFT, TOP})
 	r.FixPoint = AnchorPoint{RIGHT, BOTTOM}
 	r.SetSize(Size{25, 25})
-	testPoint, _ := r.GetAnchorPoint(AnchorPoint{LEFT, TOP})
+	testPoint, _ := r.AnchorPosition(AnchorPoint{LEFT, TOP})
 	ok, _ := testPoint.Equals(Point{25, 25})
 	tools.Test(ok, "size did not change with position remaining in place", t)
 }

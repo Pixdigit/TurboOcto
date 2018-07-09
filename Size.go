@@ -5,5 +5,5 @@ type Size struct {
 }
 
 func (s *Size) AreaIsPositive() (bool, error) {
-	return (s.Width > 0 && s.Height > 0), nil
+	return (s.Width >= 0 && s.Height >= 0), nil
 }

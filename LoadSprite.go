@@ -11,11 +11,11 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*s
 		return &sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))
 	}
 
-	var dimensions [][2]int32
+	var dimensions []Size
 	newSprite, _ := NewSprite()
 	for _, frame := range textures {
 		_, _, w, h, err := frame.Query();	if err != nil {return &sprite{}, errors.Wrap(err, "could not determine texture size")}
-		dimensions = append(dimensions, [2]int32{w, h})
+		dimensions = append(dimensions, Size{Scalar(w), Scalar(h)})
 	}
 
 	newSprite.frames = textures

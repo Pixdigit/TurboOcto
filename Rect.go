@@ -2,6 +2,7 @@ package turboOcto
 
 import (
 	"github.com/pkg/errors"
+	"github.com/veandco/go-sdl2/sdl"
 )
 
 type xPlane int
@@ -117,7 +118,7 @@ func (r *Rect) IntersectRect(r2 Rect) (Rect, bool, error) {
 	return *intersection, true, nil
 }
 
-func (r *Rect) GetAnchorPlane(pl interface{}) (Scalar, error) {
+func (r *Rect) AnchorPlane(pl interface{}) (Scalar, error) {
 	var scalar Scalar
 
 	switch pl.(type) {
@@ -149,14 +150,14 @@ func (r *Rect) GetAnchorPlane(pl interface{}) (Scalar, error) {
 	return scalar, nil
 }
 
-func (r *Rect) GetAnchorPoint(fixPoint AnchorPoint) (Point, error) {
-	x, err := r.GetAnchorPlane(fixPoint.xAnchor);	if err != nil {return Point{}, err}
-	y, err := r.GetAnchorPlane(fixPoint.yAnchor);	if err != nil {return Point{}, err}
+func (r *Rect) AnchorPosition(fixPoint AnchorPoint) (Point, error) {
+	x, err := r.AnchorPlane(fixPoint.xAnchor);	if err != nil {return Point{}, err}
+	y, err := r.AnchorPlane(fixPoint.yAnchor);	if err != nil {return Point{}, err}
 
 	return Point{x, y}, nil
 }
-func (r *Rect) GetPosition() (Point, error) {
-	return r.GetAnchorPoint(r.FixPoint)
+func (r *Rect) Position() (Point, error) {
+	return r.AnchorPosition(r.FixPoint)
 }
 
 func (r *Rect) MoveTo(p Point) error {
@@ -172,8 +173,12 @@ func (r *Rect) MoveRelative(v Vector) error {
 
 //SetSize changes the size of the Rect in such a way, that the anchor will stay in place
 func (r *Rect) SetSize(s Size) error {
-	anchor, err := r.GetAnchorPoint(r.FixPoint);	if err != nil {return errors.Wrap(err, "could not change size")}
+	anchor, err := r.Position();	if err != nil {return errors.Wrap(err, "could not change size")}
 	r.size = s
 	err = r.MoveTo(anchor);	if err != nil {return errors.Wrap(err, "could not retain position in place after size change")}
 	return nil
+}
+
+func (r *Rect) SDLRect() (*sdl.Rect, error) {
+	return &sdl.Rect{int32(r.topLeftReference.X), int32(r.topLeftReference.Y), int32(r.size.Width), int32(r.size.Height)}, nil
 }
