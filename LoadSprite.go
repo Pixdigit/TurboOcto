@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Pixdigit/geometry"
 )
 
 func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*sprite, error) {
@@ -11,11 +12,11 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*s
 		return &sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))
 	}
 
-	var dimensions []Size
+	var dimensions []geometry.Size
 	newSprite, _ := NewSprite()
 	for _, frame := range textures {
 		_, _, w, h, err := frame.Query();	if err != nil {return &sprite{}, errors.Wrap(err, "could not determine texture size")}
-		dimensions = append(dimensions, Size{Scalar(w), Scalar(h)})
+		dimensions = append(dimensions, geometry.Size{geometry.Scalar(w), geometry.Scalar(h)})
 	}
 
 	newSprite.frames = textures

@@ -3,12 +3,13 @@ package turboOcto
 import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Pixdigit/geometry"
 )
 
 type sprite struct {
-	frames             []*sdl.Texture
-	dimensions         []Size
-	rect               *Rect
+	frames     []*sdl.Texture
+	dimensions []geometry.Size
+	*geometry.Rect
 	Delays             []int32
 	animationStatus    Runlevel
 	timerMode          int32
@@ -19,6 +20,7 @@ type sprite struct {
 	AllowFrameSkipping bool
 	FrameIndex         int32
 	layer              int32
+	constraint         func(*sprite) error
 }
 
 const (
@@ -32,7 +34,7 @@ func NewSprite() (*sprite, error) {
 	newSprite := &sprite{}
 	//ensure sprite is the topmost of level 0
 	sprites = append([]*sprite{newSprite}, sprites...)
-	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not read default configuration for new sprite")}
+	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not change layer for new Sprite")}
 
 	timerMode, err := GetConf("spriteTimerMode");	if err != nil {return &sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
 	newSprite.timerMode = int32(timerMode.(int))
@@ -40,11 +42,15 @@ func NewSprite() (*sprite, error) {
 	newSprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
 	newSprite.lastFrameCount = frameCount
 	newSprite.animationStatus = RUNNING
-	newSprite.rect, err = NewRect(Point{0, 0}, Size{0, 0}, AnchorPoint{CENTERX, CENTERY});	if err != nil {return &sprite{}, errors.Wrap(err, "could not create bounding rect for sprite")}
+	// TODO: Is this needed?
+	//newSprite.dimensions = []Size{Size{}}
+	newSprite.Rect, err = geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.AnchorPoint{geometry.CENTERX, geometry.CENTERY});	if err != nil {return &sprite{}, errors.Wrap(err, "could not create bounding rect for sprite")}
 
 	return newSprite, nil
 }
 
+//ChangeLayer is quite performance heavy since it moves an element within a slice
+//this, however, will save computational power at Blit-Time
 func (s *sprite) ChangeLayer(layer int32) error {
 	s.layer = layer
 	for i := len(sprites) - 1; i >= 0; i-- {
@@ -96,19 +102,37 @@ func (s *sprite) IncrementTime() error {
 		}
 	}
 	s.lastTimer = s.timer
+	err := s.Rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
+	return nil
+}
+
+func (s *sprite) SetConstraint(constraint func(*sprite) error) error {
+	s.constraint = constraint
+	s.constraint(s)
+	return nil
+}
+
+func (s *sprite) SetSize(size geometry.Size) error {
+
+	s.dimensions[s.FrameIndex] = size
+	err := s.Rect.SetSize(size);	if err != nil {return errors.Wrap(err, "could not change size of sprite's rect")}
+
 	return nil
 }
 
 func (s *sprite) BlitToScreen() error {
-	err := s.rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
-	dstRect, err := s.rect.SDLRect();	if err != nil {return errors.Wrap(err, "could not convert sprite boundaries to SDL rect")}
+
+	size, err := s.Rect.Size();	if err != nil {return errors.Wrap(err, "could not get sprite size for blitting")}
+	topLeft, err := s.Rect.AnchorPosition(geometry.AnchorPoint{geometry.LEFT, geometry.TOP});	if err != nil {return errors.Wrap(err, "could not get sprite position for blitting")}
+	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	err = screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
 	return nil
 }
 
 func (s *sprite) Blit(dstTexture *sdl.Texture) error {
-	err := s.rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
-	dstRect, err := s.rect.SDLRect();	if err != nil {return errors.Wrap(err, "could not convert sprite boundaries to SDL rect")}
+	size, err := s.Rect.Size();	if err != nil {return errors.Wrap(err, "could not get sprite size for blitting")}
+	topLeft, err := s.Rect.AnchorPosition(geometry.AnchorPoint{geometry.LEFT, geometry.TOP});	if err != nil {return errors.Wrap(err, "could not get sprite position for blitting")}
+	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
 	renderer.SetRenderTarget(dstTexture)
 	err = renderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
@@ -133,14 +157,14 @@ func (s *sprite) Pause() error {
 	return nil
 }
 
-func BlitAllToScreen() error {
+func BlitAllSpritesToScreen() error {
 	for _, sp := range sprites {
 		err := sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
 	}
 	return nil
 }
 
-func UpdateAll() error {
+func UpdateAllSpriteTimers() error {
 	for _, sp := range sprites {
 		err := sp.IncrementTime();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
 	}
