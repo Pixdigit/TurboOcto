@@ -140,16 +140,16 @@ func SetScaler(sizer sizerType, scaler scalerType) {
 	}
 }
 
-func FillScreen(r, g, b, a uint8) {
-	oldR, oldG, oldB, oldA, _ := screenRenderer.GetDrawColor()
-	screenRenderer.SetDrawColor(r, g, b, a)
-	screenRenderer.FillRect(nil)
-	screenRenderer.SetDrawColor(oldR, oldG, oldB, oldA)
+func FillScreen(r, g, b, a uint8) error {
+	err := screenRenderer.SetDrawColor(r, g, b, a);	if err != nil {return errors.Wrap(err, "could not set draw color for fill operation")}
+	err = screenRenderer.FillRect(nil);	if err != nil {return errors.Wrap(err, "could not execute fill operation")}
+	return nil
 }
 func Clear() {
 	FillScreen(0, 0, 0, 0)
 }
-func Present() {
+func Present() error {
 	screenRenderer.Present()
 	frameCount += 1
+	return nil
 }

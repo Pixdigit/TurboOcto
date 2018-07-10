@@ -25,21 +25,27 @@ func TestScreen(t *testing.T) {
 func TestRenderer(t *testing.T) {
 	/*pixelFormat, _ := window.GetPixelFormat() //TODO: CHeck out error
 
-	  testPixels := func (r, g, b, a uint8) {
-	      var pixels unsafe.Pointer
-	      pitch := 100 //for this test pitch can be arbitrary
-	      screenRenderer.ReadPixels(nil, pixelFormat, pixels, pitch)
+	testPixels := func (r, g, b, a uint8) {
+	    var pixels unsafe.Pointer
+	    pitch := 100 //for this test pitch can be arbitrary
+	    screenRenderer.ReadPixels(nil, pixelFormat, pixels, pitch)
 
-	      pixelsa := (*[]uint32)(pixels)
-	      for _, pixel := range(*pixelsa) {
-	          print(pixel)
-	      }
-	  }*/ //TODO: Wait for go-sdl2 to return premade pixels array
+	    pixelsa := (*[]uint32)(pixels)
+	    for _, pixel := range(*pixelsa) {
+	        print(pixel)
+	    }
+	}*/ //TODO: Wait for go-sdl2 to return premade pixels array
 
 	FillScreen(255, 127, 0, 255)
+	sdl.Delay(50)
 	Present()
+	sdl.Delay(500)
 	FillScreen(0, 255, 127, 255)
+	sdl.Delay(50)
 	Present()
+	sdl.Delay(500)
 	FillScreen(127, 0, 255, 255)
+	sdl.Delay(50)
 	Present()
+	sdl.Delay(500)
 }
