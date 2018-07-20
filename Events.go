@@ -2,13 +2,14 @@ package turboOcto
 
 import (
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Pixdigit/geometry"
 )
 
 type MouseState struct {
-	X, Y            int32
-	XRel, YRel      int32
-	Scrolled        int32
-	ScrollRelative  int32
+	Pos             geometry.Point
+	Movement        geometry.Vector
+	Scroll          geometry.Scalar
+	ScrollRelative  geometry.Scalar
 	ButtonsHeld     []bool
 	ButtonsClicked  []bool
 	ButtonsReleased []bool
@@ -18,7 +19,10 @@ var Mouse MouseState
 
 func init() {
 	Mouse = MouseState{
-		0, 0, 0, 0, 0, 0,
+		geometry.Point{0, 0},
+		geometry.Vector{0, 0},
+		0,
+		0,
 		make([]bool, 3),
 		make([]bool, 3),
 		make([]bool, 3),
@@ -27,7 +31,8 @@ func init() {
 
 func UpdateEvents() {
 	//Reset frame dependend variables
-	Mouse.XRel, Mouse.YRel = 0, 0
+	Mouse.Movement.X = 0
+	Mouse.Movement.Y = 0
 	Mouse.ScrollRelative = 0
 	for i := range Mouse.ButtonsClicked {
 		Mouse.ButtonsClicked[i] = false
@@ -39,8 +44,11 @@ func UpdateEvents() {
 	for event := sdl.PollEvent(); event != nil; event = sdl.PollEvent() {
 		switch e := event.(type) {
 		case *sdl.MouseButtonEvent:
-			x, y := scalePoint(e.X, e.Y)
-			Mouse.X, Mouse.Y = x, y
+			pos := geometry.Point{
+				geometry.Scalar(e.X),
+				geometry.Scalar(e.Y),
+			}
+			Mouse.Pos.MoveTo(scalePoint(pos))
 			if e.Type == sdl.MOUSEBUTTONDOWN {
 				switch e.Button {
 				case sdl.BUTTON_LEFT:
@@ -70,25 +78,29 @@ func UpdateEvents() {
 			}
 		case *sdl.MouseMotionEvent:
 			//TODO: Change relative motion too
-			x, y := scalePoint(e.X, e.Y)
-			Mouse.X, Mouse.Y = x, y
-			Mouse.XRel, Mouse.YRel = e.XRel, e.YRel
+			pos := geometry.Point{
+				geometry.Scalar(e.X),
+				geometry.Scalar(e.Y),
+			}
+			Mouse.Pos.MoveTo(scalePoint(pos))
+			Mouse.Movement = geometry.Vector{
+				geometry.Scalar(e.XRel),
+				geometry.Scalar(e.YRel),
+			}
 		case *sdl.MouseWheelEvent:
-			x, y := scalePoint(e.X, e.Y)
-			Mouse.X, Mouse.Y = x, y
-			Mouse.ScrollRelative = e.X
-			Mouse.Scrolled += e.X
+			Mouse.ScrollRelative = geometry.Scalar(e.X)
+			Mouse.Scroll += geometry.Scalar(e.X)
 		}
 	}
 }
-func scalePoint(x, y int32) (int32, int32) {
+func scalePoint(p geometry.Point) geometry.Point {
 	if sizer == UNDERFIT_SCALE {
 		xScale := float64(drawWidth) / float64(screenWidth)
-		x = int32(float64(xOffset) + xScale*float64(x))
+		p.X = geometry.Scalar(float64(xOffset) + xScale*float64(p.X))
 		yScale := float64(drawHeight) / float64(screenHeight)
-		y = int32(float64(yOffset) + yScale*float64(y))
+		p.Y = geometry.Scalar(float64(yOffset) + yScale*float64(p.Y))
 	}
-	return x, y
+	return p
 }
 func setMouseButtonState(buttonIndex int32, isDown bool) {
 	for len(Mouse.ButtonsClicked)-1 < int(buttonIndex) {

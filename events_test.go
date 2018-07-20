@@ -23,7 +23,7 @@ func TestEventScaling(t *testing.T) {
 	tools.Test(!filtered, "test event was not pushed succesfully to the queue", t)
 	Windowed(20, 20)
 	UpdateEvents()
-	tools.Test(Mouse.X < 20 && Mouse.X >= 0, "event handler did not scale input", t)
-	tools.Test(Mouse.X != 0, "mouse position did not change on mouse event", t)
+	tools.Test(Mouse.Pos.X < 20 && Mouse.Pos.X >= 0, "event handler did not scale input", t)
+	tools.Test(Mouse.Pos.X != 0, "mouse position did not change on mouse event", t)
 
 }
