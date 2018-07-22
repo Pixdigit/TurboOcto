@@ -37,6 +37,8 @@ func TestRenderer(t *testing.T) {
 	    }
 	}*/ //TODO: Wait for go-sdl2 to return premade pixels array
 
+	Windowed()
+	SetWindowSize(500, 500)
 	FillScreen(255, 127, 0, 255)
 	sdl.Delay(50)
 	Present()
