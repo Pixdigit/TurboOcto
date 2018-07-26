@@ -42,7 +42,17 @@ func LoadDefaultConf() error {
 			Fullscreen: true,
 		},
 	}
-	err := updateFromInternals();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
+	err := setDefaultInternals();	if err != nil {return errors.Wrap(err, "could not set internal configuration to default")}
+	err = updateFromInternals();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
+	return nil
+}
+
+func setDefaultInternals() error {
+	isFullscreen = true
+	windowWidth = screenWidth / 2
+	windowHeight = screenHeight / 2
+	vWidth = windowWidth
+	vHeight = windowHeight
 	return nil
 }
 
@@ -50,8 +60,8 @@ func LoadConf(dataSrc interface{}) error {
 	//dataSrc can be file path
 	err := LoadDefaultConf();	if err != nil {return errors.Wrap(err, "set defaults before loading configuration")}
 	cfgIniFile, err := ini.Load(dataSrc);	if err != nil {return errors.Wrap(err, "could not load configuration")}
-	err = cfgIniFile.Section(confSectionName).MapTo(Cfg);	if err != nil {return errors.Wrap(err, "could not load configuration")}
-	err = cfgIniFile.Section(internalConfSectionName).MapTo(Cfg.internal);	if err != nil {return errors.Wrap(err, "could not load configuration")}
+	err = cfgIniFile.Section(confSectionName).MapTo(&Cfg);	if err != nil {return errors.Wrap(err, "could not load configuration")}
+	err = cfgIniFile.Section(internalConfSectionName).MapTo(&Cfg.internal);	if err != nil {return errors.Wrap(err, "could not load configuration")}
 	err = updateFromInternals();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
 	return nil
 }
@@ -83,11 +93,9 @@ func updateFromInternals() error {
 	errMsg := "could not process internal"
 
 	if Cfg.internal.Fullscreen {
-		err := Fullscreen()
-		return errors.Wrap(err, errMsg)
+		err := Fullscreen();	if err != nil {return errors.Wrap(err, errMsg)}
 	} else {
-		err := Windowed()
-		return errors.Wrap(err, errMsg)
+		err := Windowed();	if err != nil {return errors.Wrap(err, errMsg)}
 	}
 
 	err := SetWindowSize(Cfg.internal.WindowWidth, Cfg.internal.WindowWidth);	if err != nil {return errors.Wrap(err, errMsg)}

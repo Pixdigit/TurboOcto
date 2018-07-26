@@ -94,10 +94,7 @@ func Windowed() error {
 func SetVirtualSize(w, h int32) error {
 	vWidth, vHeight = w, h
 	screenRenderer.SetLogicalSize(vWidth, vHeight)
-	err := Clear()
-	if err != nil {
-		return errors.Wrap(err, "could not clear window after changing virtual size")
-	}
+	err := Clear();	if err != nil {return errors.Wrap(err, "could not clear window after changing virtual size")}
 	return nil
 }
 func SetWindowSize(w, h int32) error {
