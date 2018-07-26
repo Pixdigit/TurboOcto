@@ -11,8 +11,8 @@ var windowWidth, windowHeight int32
 var canvasWidth, canvasHeight int32
 var vWidth, vHeight int32
 var frameCount int32
+var isFullscreen bool
 
-//TODO: rename
 var screenRenderer *sdl.Renderer
 var window *sdl.Window
 var displayIndex int //TODO: Dynamically update when window moved
@@ -42,12 +42,11 @@ func initializeGraphics() (err error) {
 
 	//initialize sizes
 	screenWidth, screenHeight = dmode.W, dmode.H
+	windowWidth, windowHeight = window.GetSize()
 	canvasWidth, canvasHeight, err = screenRenderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
 	vWidth, vHeight = canvasWidth, canvasHeight
 
-	if ok, err := GetConf("fullscreen"); err != nil {
-		return errors.Wrap(err, "could not get fullscreen conf")
-	} else if ok.(bool) {
+	if isFullscreen {
 		Fullscreen()
 	} else {
 		Windowed()
@@ -74,28 +73,35 @@ func SetDecoration(title string, iconPath string) error {
 	return nil
 }
 
-func Fullscreen() {
+func Fullscreen() error {
 	window.SetSize(screenWidth, screenHeight)
 	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
 	canvasWidth, canvasHeight = screenWidth, screenHeight
 	FillScreen(0, 0, 0, 0)
 	Clear()
-	SetConf("fullscreen", true)
+	isFullscreen = true
+	return nil
 }
-func Windowed() {
+func Windowed() error {
 	const SDL_WINDOW_WINDOWED = 0
 	window.SetFullscreen(SDL_WINDOW_WINDOWED)
 	window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
 	Clear()
-	SetConf("fullscreen", true)
+	isFullscreen = false
+	return nil
 }
 
-func SetVirtualSize(w, h int32) {
-	Clear()
+func SetVirtualSize(w, h int32) error {
 	vWidth, vHeight = w, h
 	screenRenderer.SetLogicalSize(vWidth, vHeight)
+	err := Clear()
+	if err != nil {
+		return errors.Wrap(err, "could not clear window after changing virtual size")
+	}
+	return nil
 }
 func SetWindowSize(w, h int32) error {
+	windowWidth, windowHeight = w, h
 	window.SetSize(w, h)
 	return nil
 }
@@ -105,8 +111,9 @@ func FillScreen(r, g, b, a uint8) error {
 	err = screenRenderer.FillRect(nil);	if err != nil {return errors.Wrap(err, "could not execute fill operation")}
 	return nil
 }
-func Clear() {
+func Clear() error {
 	FillScreen(0, 0, 0, 0)
+	return nil
 }
 func Present() error {
 	screenRenderer.Present()

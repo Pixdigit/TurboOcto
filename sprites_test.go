@@ -50,15 +50,8 @@ func TestSpriteRendering(t *testing.T) {
 		testTextures = append(testTextures, tex)
 	}
 	dFrames := int32(0)
-	err := SetConf("spriteTimerMode", USE_FRAME_COUNT)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
-
-	err = SetConf("allowFrameSkipping", false)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.SpriteTimerMode = USE_FRAME_COUNT
+	Cfg.AllowFrameSkipping = false
 	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 0, 0, 0, 0})
 	if err != nil {
 		tools.WrapErr(err, "could not create test sprite", t)
@@ -82,10 +75,7 @@ func TestSpriteRendering(t *testing.T) {
 		Present()
 	}
 
-	err = SetConf("allowFrameSkipping", true)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 1, 0, 1, 1})
 	if err != nil {
 		tools.WrapErr(err, "could not create test sprite", t)
@@ -108,10 +98,7 @@ func TestSpriteRendering(t *testing.T) {
 		Present()
 	}
 
-	err = SetConf("allowFrameSkipping", true)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 3, 0, 5, 1})
 	if err != nil {
 		tools.WrapErr(err, "could not create test sprite", t)
@@ -134,10 +121,7 @@ func TestSpriteRendering(t *testing.T) {
 		Present()
 	}
 
-	err = SetConf("allowFrameSkipping", true)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, -2, 1, 1})
 	if err != nil {
 		tools.WrapErr(err, "could not create test sprite", t)
@@ -160,10 +144,7 @@ func TestSpriteRendering(t *testing.T) {
 		Present()
 	}
 
-	err = SetConf("allowFrameSkipping", true)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 2, 1})
 	if err != nil {
 		tools.WrapErr(err, "could not create test sprite", t)
@@ -198,14 +179,8 @@ func TestSpriteControl(t *testing.T) {
 		}
 		testTextures = append(testTextures, tex)
 	}
-	err := SetConf("spriteTimerMode", USE_FRAME_COUNT)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
-	err = SetConf("allowFrameSkipping", false)
-	if err != nil {
-		tools.WrapErr(err, "error while setting configuration", t)
-	}
+	Cfg.SpriteTimerMode = USE_FRAME_COUNT
+	Cfg.AllowFrameSkipping = false
 
 	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, 1, 1, 1})
 	if err != nil {

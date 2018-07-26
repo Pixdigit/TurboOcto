@@ -36,10 +36,8 @@ func NewSprite() (*sprite, error) {
 	sprites = append([]*sprite{newSprite}, sprites...)
 	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not change layer for new Sprite")}
 
-	timerMode, err := GetConf("spriteTimerMode");	if err != nil {return &sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-	newSprite.timerMode = int32(timerMode.(int))
-	AllowFrameSkipping, err := GetConf("allowFrameSkipping");	if err != nil {return &sprite{}, errors.Wrap(err, "could not read configuration for new sprite")}
-	newSprite.AllowFrameSkipping = AllowFrameSkipping.(bool)
+	newSprite.timerMode = int32(Cfg.SpriteTimerMode)
+	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.lastFrameCount = frameCount
 	newSprite.animationStatus = RUNNING
 	// TODO: Is this needed?
