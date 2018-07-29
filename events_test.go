@@ -27,5 +27,18 @@ func TestEventScaling(t *testing.T) {
 	UpdateEvents()
 	t.Logf("Mouse at: %+v\n", Mouse.Pos)
 	tools.Test(Mouse.Pos.X == 10 && Mouse.Pos.Y == 10, "event handler did not scale input", t)
-
 }
+
+/*
+TODO: Wait for implementations of all needed parts
+func TestInteractive(t *testing.T) {
+	if testing.Short() {
+		t.SkipNow()
+	}
+
+	Windowed()
+	SetWindowSize(500, 500)
+	Clear()
+	window.SetTitle("Click all white boxes")
+
+}*/
