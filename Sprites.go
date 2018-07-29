@@ -42,7 +42,8 @@ func NewSprite() (*sprite, error) {
 	newSprite.animationStatus = RUNNING
 	// TODO: Is this needed?
 	//newSprite.dimensions = []Size{Size{}}
-	newSprite.Rect, err = geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.AnchorPoint{geometry.CENTERX, geometry.CENTERY});	if err != nil {return &sprite{}, errors.Wrap(err, "could not create bounding rect for sprite")}
+	rect := geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.CENTER)
+	newSprite.Rect = &rect
 
 	return newSprite, nil
 }
@@ -100,7 +101,7 @@ func (s *sprite) IncrementTime() error {
 		}
 	}
 	s.lastTimer = s.timer
-	err := s.Rect.SetSize(s.dimensions[s.FrameIndex]);	if err != nil {return errors.Wrap(err, "could not change sprite size to dimension for this frame")}
+	s.Rect.SetSize(s.dimensions[s.FrameIndex])
 	return nil
 }
 
@@ -111,25 +112,22 @@ func (s *sprite) SetConstraint(constraint func(*sprite) error) error {
 }
 
 func (s *sprite) SetSize(size geometry.Size) error {
-
 	s.dimensions[s.FrameIndex] = size
-	err := s.Rect.SetSize(size);	if err != nil {return errors.Wrap(err, "could not change size of sprite's rect")}
-
+	s.Rect.SetSize(size)
 	return nil
 }
 
 func (s *sprite) BlitToScreen() error {
-
-	size, err := s.Rect.Size();	if err != nil {return errors.Wrap(err, "could not get sprite size for blitting")}
-	topLeft, err := s.Rect.AnchorPosition(geometry.AnchorPoint{geometry.LEFT, geometry.TOP});	if err != nil {return errors.Wrap(err, "could not get sprite position for blitting")}
+	size := s.Rect.Size()
+	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
-	err = screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
+	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
 	return nil
 }
 
 func (s *sprite) Blit(dstTexture *sdl.Texture) error {
-	size, err := s.Rect.Size();	if err != nil {return errors.Wrap(err, "could not get sprite size for blitting")}
-	topLeft, err := s.Rect.AnchorPosition(geometry.AnchorPoint{geometry.LEFT, geometry.TOP});	if err != nil {return errors.Wrap(err, "could not get sprite position for blitting")}
+	size := s.Rect.Size()
+	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
 	renderer.SetRenderTarget(dstTexture)

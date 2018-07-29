@@ -86,6 +86,7 @@ func Windowed() error {
 	const SDL_WINDOW_WINDOWED = 0
 	window.SetFullscreen(SDL_WINDOW_WINDOWED)
 	window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
+	canvasWidth, canvasHeight = windowWidth, windowHeight
 	Clear()
 	isFullscreen = false
 	return nil
