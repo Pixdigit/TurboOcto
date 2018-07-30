@@ -48,7 +48,7 @@ func UpdateEvents() {
 			//Create entry for key if it does not exist yet
 			_, ok := Keyboard[e.Keysym.Scancode]
 			if !ok {
-				Keyboard[e.Keysym.Scancode] = &RELEASED
+				Keyboard[e.Keysym.Scancode] = RELEASED.copy()
 			}
 			//Update key
 			if e.Type == sdl.KEYDOWN {

@@ -40,11 +40,11 @@ func init() {
 		0,
 		0,
 		map[buttonPosition]*buttonState{
-			ButtonTypes.Left:   &RELEASED,
-			ButtonTypes.Center: &RELEASED,
-			ButtonTypes.Right:  &RELEASED,
-			ButtonTypes.X1:     &RELEASED,
-			ButtonTypes.X2:     &RELEASED,
+			ButtonTypes.Left:   RELEASED.copy(),
+			ButtonTypes.Center: RELEASED.copy(),
+			ButtonTypes.Right:  RELEASED.copy(),
+			ButtonTypes.X1:     RELEASED.copy(),
+			ButtonTypes.X2:     RELEASED.copy(),
 		},
 	}
 }

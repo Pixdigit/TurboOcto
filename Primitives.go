@@ -38,7 +38,7 @@ func (r *Rect) Fill(red, green, blue, a uint8) error {
 }
 
 func (r *Rect) IsClicked(which buttonPosition) (bool, error) {
-	return r.Rect.Contains(Mouse.Pos) && *Mouse.Buttons[which] == PRESSING, nil
+	return r.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
 }
 
 func (r *Rect) SDLRect() (*sdl.Rect, error) {

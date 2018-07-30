@@ -13,6 +13,9 @@ func (b *buttonState) update(isDown bool) {
 	}
 	b.IsDown = isDown
 }
+func (b *buttonState) copy() *buttonState {
+	return &buttonState{b.IsDown, b.Changed}
+}
 
 var (
 	RELEASED  = buttonState{false, false}
