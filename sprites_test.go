@@ -201,9 +201,7 @@ func TestSpriteControl(t *testing.T) {
 	sp.Start()
 	sp.IncrementTime()
 	tools.Test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
-	//FIXME: why do I need to present twice
 	Present()
-	//Present()
 	sp.IncrementTime()
 	tools.Test(sp.FrameIndex == 1, "sprite did not start frameCount after stop", t)
 	Quit()

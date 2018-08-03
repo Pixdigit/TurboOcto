@@ -12,7 +12,7 @@ type sprite struct {
 	*geometry.Rect
 	Delays             []int32
 	animationStatus    Runlevel
-	timerMode          int32
+	timerMode          timerMode
 	timer              int32
 	lastBlit           int32
 	lastFrameCount     int32
@@ -23,8 +23,10 @@ type sprite struct {
 	constraint         func(*sprite) error
 }
 
+type timerMode int
+
 const (
-	USE_FRAME_COUNT = iota
+	USE_FRAME_COUNT = timerMode(iota)
 	USE_TIME_PASSED
 )
 
@@ -36,7 +38,7 @@ func NewSprite() (*sprite, error) {
 	sprites = append([]*sprite{newSprite}, sprites...)
 	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not change layer for new Sprite")}
 
-	newSprite.timerMode = int32(Cfg.SpriteTimerMode)
+	newSprite.timerMode = timerMode(Cfg.SpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.lastFrameCount = frameCount
 	newSprite.animationStatus = RUNNING

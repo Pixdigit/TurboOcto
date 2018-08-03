@@ -17,7 +17,7 @@ type internals struct {
 type configuration struct {
 	UpdateOnRefresh    bool
 	AllowFrameSkipping bool
-	SpriteTimerMode    int
+	SpriteTimerMode    timerMode
 	ResourcePath       string
 	internal           internals
 }
