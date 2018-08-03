@@ -4,12 +4,13 @@ import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Pixdigit/geometry"
 )
 
-var screenWidth, screenHeight int32
-var windowWidth, windowHeight int32
-var canvasWidth, canvasHeight int32
-var vWidth, vHeight int32
+var screenSize *geometry.Size
+var windowSize *geometry.Size
+var canvasSize *geometry.Size
+var vSize *geometry.Size
 var frameCount int32
 var isFullscreen bool
 
@@ -42,25 +43,31 @@ func initializeGraphics() (err error) {
 	dmode, err := sdl.GetDesktopDisplayMode(displayIndex);	if err != nil {return errors.Wrap(err, "could not get display mode")}
 
 	//initialize sizes
-	screenWidth, screenHeight = dmode.W, dmode.H
-	windowWidth, windowHeight = window.GetSize()
-	canvasWidth, canvasHeight, err = screenRenderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
-	vWidth, vHeight = canvasWidth, canvasHeight
+	screenSize = &geometry.Size{geometry.Scalar(dmode.W), geometry.Scalar(dmode.H)}
+	w, h := window.GetSize()
+	windowSize = &geometry.Size{geometry.Scalar(w), geometry.Scalar(h)}
+	w, h, err = screenRenderer.GetOutputSize();	if err != nil {return errors.Wrap(err, "could not read output size")}
+	canvasSize = &geometry.Size{geometry.Scalar(w), geometry.Scalar(h)}
+	vSize = canvasSize.Copy()
 
 	if isFullscreen {
 		Fullscreen()
 	} else {
 		Windowed()
-		SetWindowSize(screenWidth/4, screenHeight/4)
+		SetWindowSize(*screenSize.GetScaled(1 / 4))
 	}
 
 	Clear()
 	return nil
 }
 
+func getSDLSize(size *geometry.Size) (int32, int32) {
+	return int32(size.Width), int32(size.Height)
+}
+
 func SetDecoration(title string, iconPath string) error {
 	window.SetTitle(title)
-	iconPath = "./assets/sprites/" + iconPath
+	iconPath = Cfg.ResourcePath + iconPath
 	if iconPath != "" {
 		if exists, err := pathExists(iconPath); err != nil {
 			return errors.Wrap(err, "could not check wether icon file exists")
@@ -75,9 +82,9 @@ func SetDecoration(title string, iconPath string) error {
 }
 
 func Fullscreen() error {
-	window.SetSize(screenWidth, screenHeight)
+	window.SetSize(getSDLSize(screenSize))
 	window.SetFullscreen(sdl.WINDOW_FULLSCREEN)
-	canvasWidth, canvasHeight = screenWidth, screenHeight
+	canvasSize = screenSize.Copy()
 	FillScreen(0, 0, 0, 0)
 	Clear()
 	isFullscreen = true
@@ -87,22 +94,25 @@ func Windowed() error {
 	const SDL_WINDOW_WINDOWED = 0
 	window.SetFullscreen(SDL_WINDOW_WINDOWED)
 	window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
-	canvasWidth, canvasHeight = windowWidth, windowHeight
+	canvasSize = windowSize.Copy()
 	Clear()
 	isFullscreen = false
 	return nil
 }
 
-func SetVirtualSize(w, h int32) error {
-	vWidth, vHeight = w, h
-	screenRenderer.SetLogicalSize(vWidth, vHeight)
+func SetVirtualSize(size geometry.Size) error {
+	vSize = &size
+	screenRenderer.SetLogicalSize(getSDLSize(&size))
 	err := Clear();	if err != nil {return errors.Wrap(err, "could not clear window after changing virtual size")}
 	return nil
 }
-func SetWindowSize(w, h int32) error {
-	windowWidth, windowHeight = w, h
-	window.SetSize(w, h)
+func SetWindowSize(size geometry.Size) error {
+	windowSize = size.Copy()
+	window.SetSize(getSDLSize(windowSize))
 	return nil
+}
+func WindowSize() (geometry.Size, error) {
+	return *windowSize.Copy(), nil
 }
 
 func FillScreen(r, g, b, a uint8) error {

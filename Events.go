@@ -5,7 +5,7 @@ import (
 	"gitlab.com/Pixdigit/geometry"
 )
 
-func UpdateEvents() {
+func updateEvents() error {
 	//Reset frame dependend variables
 	Mouse.Movement.X = 0
 	Mouse.Movement.Y = 0
@@ -58,4 +58,5 @@ func UpdateEvents() {
 			}
 		}
 	}
+	return nil
 }

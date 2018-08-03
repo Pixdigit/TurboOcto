@@ -28,7 +28,7 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*s
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*sprite, error) {
 	var textures []*sdl.Texture
 	for _, fileName := range fileNames {
-		texture, err := img.LoadTexture(screenRenderer, "./assets/sprites/"+fileName);	if err != nil {return &sprite{}, errors.Wrap(err, "could not load sprite file \"./assets/sprites/"+fileName+"\"")}
+		texture, err := img.LoadTexture(screenRenderer, Cfg.ResourcePath+fileName);	if err != nil {return &sprite{}, errors.Wrap(err, "could not load sprite file \""+Cfg.ResourcePath+fileName+"\"")}
 		textures = append(textures, texture)
 	}
 	return LoadAnimatedSpriteFromTextures(textures, delays)

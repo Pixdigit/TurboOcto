@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/veandco/go-sdl2/sdl"
+	"gitlab.com/Pixdigit/geometry"
 	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
@@ -11,11 +12,11 @@ func TestScreen(t *testing.T) {
 	Windowed()
 	testDelay := uint32(30)
 	tools.TestAgainstStrings(
-		func(s string) error { return SetDecoration(s, "../../testEnv/testIcon.png") },
+		func(s string) error { return SetDecoration(s, "testEnv/testIcon.png") },
 		func() (string, error) { s := window.GetTitle(); return s, nil },
 		"window title not set properly", t)
 	sdl.Delay(testDelay)
-	SetWindowSize(500, 500)
+	SetWindowSize(geometry.Size{500, 500})
 	x, y := window.GetSize()
 	tools.Test((x == 500 && y == 500), "window has not changed resolution correctly", t)
 	sdl.Delay(testDelay)
@@ -38,7 +39,7 @@ func TestRenderer(t *testing.T) {
 	}*/ //TODO: Wait for go-sdl2 to return premade pixels array
 
 	Windowed()
-	SetWindowSize(500, 500)
+	SetWindowSize(geometry.Size{500, 500})
 	FillScreen(255, 127, 0, 255)
 	sdl.Delay(50)
 	Present()

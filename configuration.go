@@ -4,15 +4,16 @@ import (
 	"os"
 
 	"github.com/pkg/errors"
+	"gitlab.com/Pixdigit/geometry"
 	"gopkg.in/ini.v1"
 )
 
 type internals struct {
 	Fullscreen   bool
-	WindowWidth  int32
-	WindowHeight int32
-	VHeight      int32
-	VWidth       int32
+	WindowWidth  geometry.Scalar
+	WindowHeight geometry.Scalar
+	VHeight      geometry.Scalar
+	VWidth       geometry.Scalar
 }
 type configuration struct {
 	UpdateOnRefresh    bool
@@ -43,16 +44,14 @@ func LoadDefaultConf() error {
 		},
 	}
 	err := setDefaultInternals();	if err != nil {return errors.Wrap(err, "could not set internal configuration to default")}
-	err = updateFromInternals();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
+	err = updateFromInternalCfg();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
 	return nil
 }
 
 func setDefaultInternals() error {
 	isFullscreen = true
-	windowWidth = screenWidth / 2
-	windowHeight = screenHeight / 2
-	vWidth = windowWidth
-	vHeight = windowHeight
+	windowSize = screenSize.GetScaled(1 / 2)
+	vSize = windowSize.Copy()
 	return nil
 }
 
@@ -62,7 +61,7 @@ func LoadConf(dataSrc interface{}) error {
 	cfgIniFile, err := ini.Load(dataSrc);	if err != nil {return errors.Wrap(err, "could not load configuration")}
 	err = cfgIniFile.Section(confSectionName).MapTo(&Cfg);	if err != nil {return errors.Wrap(err, "could not load configuration")}
 	err = cfgIniFile.Section(internalConfSectionName).MapTo(&Cfg.internal);	if err != nil {return errors.Wrap(err, "could not load configuration")}
-	err = updateFromInternals();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
+	err = updateFromInternalCfg();	if err != nil {return errors.Wrap(err, "could not update based on conf")}
 	return nil
 }
 
@@ -74,10 +73,10 @@ func SaveConf(filePath string) error {
 
 	Cfg.internal = internals{
 		isFullscreen,
-		windowWidth,
-		windowHeight,
-		vWidth,
-		vHeight,
+		windowSize.Width,
+		windowSize.Height,
+		vSize.Width,
+		vSize.Height,
 	}
 
 	cfgIniFile, err := ini.Load(filePath);	if err != nil {return errors.Wrap(err, "could not load configuration file \""+filePath+"\"")}
@@ -88,7 +87,7 @@ func SaveConf(filePath string) error {
 	return nil
 }
 
-func updateFromInternals() error {
+func updateFromInternalCfg() error {
 	//TODO: refine error management
 	errMsg := "could not process internal"
 
@@ -98,8 +97,8 @@ func updateFromInternals() error {
 		err := Windowed();	if err != nil {return errors.Wrap(err, errMsg)}
 	}
 
-	err := SetWindowSize(Cfg.internal.WindowWidth, Cfg.internal.WindowWidth);	if err != nil {return errors.Wrap(err, errMsg)}
-	err = SetVirtualSize(Cfg.internal.VWidth, Cfg.internal.VHeight);	if err != nil {return errors.Wrap(err, errMsg)}
+	err := SetWindowSize(geometry.Size{Cfg.internal.WindowWidth, Cfg.internal.WindowWidth});	if err != nil {return errors.Wrap(err, errMsg)}
+	err = SetVirtualSize(geometry.Size{Cfg.internal.VWidth, Cfg.internal.VHeight});	if err != nil {return errors.Wrap(err, errMsg)}
 
 	return nil
 }

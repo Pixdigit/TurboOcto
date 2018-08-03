@@ -20,7 +20,7 @@ type sprite struct {
 	AllowFrameSkipping bool
 	FrameIndex         int32
 	layer              int32
-	Visible bool
+	Visible            bool
 	constraint         func(*sprite) error
 }
 
@@ -121,7 +121,7 @@ func (s *sprite) SetSize(size geometry.Size) error {
 }
 
 func (s *sprite) BlitToScreen() error {
-	if (!s.Visible) {
+	if !s.Visible {
 		return nil
 	}
 	size := s.Rect.Size()
@@ -132,7 +132,7 @@ func (s *sprite) BlitToScreen() error {
 }
 
 func (s *sprite) Blit(dstTexture *sdl.Texture) error {
-	if (!s.Visible) {
+	if !s.Visible {
 		return nil
 	}
 	size := s.Rect.Size()

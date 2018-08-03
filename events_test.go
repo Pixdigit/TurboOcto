@@ -11,8 +11,8 @@ import (
 
 func TestEventScaling(t *testing.T) {
 	Windowed()
-	SetWindowSize(20, 20)
-	SetVirtualSize(50, 50)
+	SetWindowSize(geometry.Size{20, 20})
+	SetVirtualSize(geometry.Size{50, 50})
 	e := &sdl.MouseButtonEvent{
 		Type:      sdl.MOUSEBUTTONDOWN,
 		Timestamp: 1337,
@@ -21,12 +21,9 @@ func TestEventScaling(t *testing.T) {
 		X:         10,
 		Y:         10,
 		State:     sdl.PRESSED}
-	filtered, err := sdl.PushEvent(e)
-	if err != nil {
-		tools.WrapErr(err, "could not push test event", t)
-	}
+	filtered, err := sdl.PushEvent(e);	if err != nil {tools.WrapErr(err, "could not push test event", t)}
 	tools.Test(!filtered, "test event was not pushed succesfully to the queue", t)
-	UpdateEvents()
+	updateEvents()
 	t.Logf("Mouse at: %+v\n", Mouse.Pos)
 	tools.Test(Mouse.Pos.X == 10 && Mouse.Pos.Y == 10, "event handler did not scale input", t)
 }
@@ -36,8 +33,8 @@ func TestInteractive(t *testing.T) {
 		t.SkipNow()
 	}
 
-	SetWindowSize(500, 500)
-	SetVirtualSize(500, 500)
+	SetWindowSize(geometry.Size{500, 500})
+	SetVirtualSize(geometry.Size{500, 500})
 	Windowed()
 	window.SetTitle("Click all white boxes")
 	Clear()
@@ -54,11 +51,8 @@ func TestInteractive(t *testing.T) {
 			t.Error("Square was not clicked")
 		default:
 		}
-		UpdateEvents()
-		clicked, err := testBox.IsClicked(ButtonTypes.Left)
-		if err != nil {
-			tools.WrapErr(err, "could not check for clicked rect", t)
-		}
+		updateEvents()
+		clicked, err := testBox.IsClicked(ButtonTypes.Left);	if err != nil {tools.WrapErr(err, "could not check for clicked rect", t)}
 		if clicked {
 			run = false
 			testBox.Fill(0, 255, 0, 255)
