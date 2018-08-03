@@ -24,6 +24,7 @@ func init() {
 }
 
 func Update() {
+	updateAllSprites()
 	Present()
 	UpdateEvents()
 }

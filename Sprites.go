@@ -20,6 +20,7 @@ type sprite struct {
 	AllowFrameSkipping bool
 	FrameIndex         int32
 	layer              int32
+	Visible bool
 	constraint         func(*sprite) error
 }
 
@@ -120,6 +121,9 @@ func (s *sprite) SetSize(size geometry.Size) error {
 }
 
 func (s *sprite) BlitToScreen() error {
+	if (!s.Visible) {
+		return nil
+	}
 	size := s.Rect.Size()
 	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
@@ -128,6 +132,9 @@ func (s *sprite) BlitToScreen() error {
 }
 
 func (s *sprite) Blit(dstTexture *sdl.Texture) error {
+	if (!s.Visible) {
+		return nil
+	}
 	size := s.Rect.Size()
 	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
@@ -155,16 +162,10 @@ func (s *sprite) Pause() error {
 	return nil
 }
 
-func BlitAllSpritesToScreen() error {
-	for _, sp := range sprites {
-		err := sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
-	}
-	return nil
-}
-
-func UpdateAllSpriteTimers() error {
+func updateAllSprites() error {
 	for _, sp := range sprites {
 		err := sp.IncrementTime();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
+		err = sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
 	}
 	return nil
 }
