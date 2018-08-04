@@ -50,7 +50,7 @@ func LoadDefaultConf() error {
 
 func setDefaultInternals() error {
 	isFullscreen = true
-	windowSize = screenSize.GetScaled(1 / 2)
+	windowSize = screenSize.GetScaled(1 / 2.0)
 	vSize = windowSize.Copy()
 	return nil
 }

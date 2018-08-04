@@ -10,7 +10,7 @@ type sprite struct {
 	frames     []*sdl.Texture
 	dimensions []geometry.Size
 	*geometry.Rect
-	Delays             []int32
+	delays             []int32
 	animationStatus    Runlevel
 	timerMode          timerMode
 	timer              int32
@@ -43,6 +43,7 @@ func NewSprite() (*sprite, error) {
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.lastFrameCount = frameCount
 	newSprite.animationStatus = RUNNING
+	newSprite.Visible = true
 	// TODO: Is this needed?
 	//newSprite.dimensions = []Size{Size{}}
 	rect := geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.CENTER)
@@ -77,7 +78,24 @@ func (s *sprite) ChangeLayer(layer int32) error {
 	return nil
 }
 
+func (s *sprite) SetDelay(time int32) error {
+	cummulativeWaitingTime := int32(0)
+	s.delays[s.FrameIndex] = time
+	for _, delay := range s.delays {
+		cummulativeWaitingTime += delay
+	}
+	if cummulativeWaitingTime == 0 && s.AllowFrameSkipping {
+		s.Stop()
+		return errors.New("Sprite does not have any waiting time and will be blitted inifinitly")
+	}
+	return nil
+}
+
 func (s *sprite) IncrementTime() error {
+	if s.animationStatus == STOPPED {
+		return nil
+	}
+
 	currentTime := int32(sdl.GetTicks())
 	if s.animationStatus == RUNNING {
 		if s.timerMode == USE_FRAME_COUNT {
@@ -89,15 +107,15 @@ func (s *sprite) IncrementTime() error {
 	s.lastBlit = int32(currentTime)
 	s.lastFrameCount = frameCount
 
-	if s.timer >= s.Delays[s.FrameIndex] {
+	if s.timer >= s.delays[s.FrameIndex] {
 		if s.AllowFrameSkipping {
-			for s.timer >= s.Delays[s.FrameIndex] {
-				s.timer = s.timer - s.Delays[s.FrameIndex]
+			for s.timer >= s.delays[s.FrameIndex] {
+				s.timer -= s.delays[s.FrameIndex]
 				s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
 			}
 		} else {
 			//If we have no frame skipping ensure at least one blit
-			s.timer = s.timer - s.Delays[s.FrameIndex]
+			s.timer = s.timer - s.delays[s.FrameIndex]
 			if s.timer > s.lastTimer || (s.FrameIndex == 0 && s.timer == 0) {
 				s.FrameIndex = (s.FrameIndex + 1) % int32(len(s.frames))
 			}
@@ -142,6 +160,10 @@ func (s *sprite) Blit(dstTexture *sdl.Texture) error {
 	renderer.SetRenderTarget(dstTexture)
 	err = renderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
 	return nil
+}
+
+func (s *sprite) IsClicked(which buttonPosition) (bool, error) {
+	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
 }
 
 func (s *sprite) Start() error {

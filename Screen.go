@@ -54,7 +54,7 @@ func initializeGraphics() (err error) {
 		Fullscreen()
 	} else {
 		Windowed()
-		SetWindowSize(*screenSize.GetScaled(1 / 4))
+		SetWindowSize(*screenSize.GetScaled(1 / 4.0))
 	}
 
 	Clear()
@@ -108,11 +108,16 @@ func SetVirtualSize(size geometry.Size) error {
 }
 func SetWindowSize(size geometry.Size) error {
 	windowSize = size.Copy()
-	window.SetSize(getSDLSize(windowSize))
+	if !isFullscreen {
+		window.SetSize(getSDLSize(windowSize))
+	}
 	return nil
 }
 func WindowSize() (geometry.Size, error) {
 	return *windowSize.Copy(), nil
+}
+func VSize() (geometry.Size, error) {
+	return *vSize.Copy(), nil
 }
 
 func FillScreen(r, g, b, a uint8) error {

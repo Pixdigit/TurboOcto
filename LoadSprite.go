@@ -20,8 +20,13 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*s
 	}
 
 	newSprite.frames = textures
-	newSprite.Delays = delays
+	newSprite.delays = delays
 	newSprite.dimensions = dimensions
+	newSprite.FrameIndex = 0
+	//Update size
+	newSprite.Rect.SetSize(dimensions[0])
+	//ensure sprite has some delay at any frame
+	err := newSprite.SetDelay(delays[0]);	if err != nil {return &sprite{}, errors.Wrap(err, "new sprite has invalid delay")}
 	return newSprite, nil
 }
 

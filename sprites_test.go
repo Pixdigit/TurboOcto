@@ -35,7 +35,7 @@ func TestSpriteRendering(t *testing.T) {
 	frameCount = 0
 	sp.lastFrameCount = 0
 
-	for _, v := range sp.Delays {
+	for _, v := range sp.delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -52,7 +52,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	expectedFrameIndexes := []int32{1, 3, 4}
 
-	for _, v := range sp.Delays {
+	for _, v := range sp.delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -69,7 +69,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	expectedFrameIndexes = []int32{1, 1, 1, 3, 3, 3, 3, 3, 4}
 
-	for _, v := range sp.Delays {
+	for _, v := range sp.delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -86,7 +86,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	expectedFrameIndexes = []int32{0, 1}
 
-	for _, v := range sp.Delays {
+	for _, v := range sp.delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -103,7 +103,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	expectedFrameIndexes = []int32{0, 1, 3, 4, 1, 2, 3}
 
-	for _, v := range sp.Delays {
+	for _, v := range sp.delays {
 		if v == 0 {
 			dFrames++
 		} else {
