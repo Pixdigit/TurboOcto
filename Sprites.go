@@ -42,7 +42,7 @@ func NewSprite() (*sprite, error) {
 	newSprite.timerMode = timerMode(Cfg.SpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.lastFrameCount = frameCount
-	newSprite.animationStatus = RUNNING
+	newSprite.animationStatus = STOPPED
 	newSprite.Visible = true
 	// TODO: Is this needed?
 	//newSprite.dimensions = []Size{Size{}}
@@ -92,17 +92,16 @@ func (s *sprite) SetDelay(time int32) error {
 }
 
 func (s *sprite) IncrementTime() error {
-	if s.animationStatus == STOPPED {
-		return nil
-	}
-
-	currentTime := int32(sdl.GetTicks())
+	var currentTime int32
 	if s.animationStatus == RUNNING {
+		currentTime := int32(sdl.GetTicks())
 		if s.timerMode == USE_FRAME_COUNT {
 			s.timer += frameCount - s.lastFrameCount
 		} else if s.timerMode == USE_TIME_PASSED {
 			s.timer += currentTime - s.lastBlit
 		}
+	} else if s.animationStatus == STOPPED {
+		return nil
 	}
 	s.lastBlit = int32(currentTime)
 	s.lastFrameCount = frameCount
