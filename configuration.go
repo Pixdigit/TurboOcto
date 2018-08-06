@@ -12,8 +12,8 @@ type internals struct {
 	Fullscreen   bool
 	WindowWidth  geometry.Scalar
 	WindowHeight geometry.Scalar
-	VHeight      geometry.Scalar
-	VWidth       geometry.Scalar
+	VWidth      geometry.Scalar
+	VHeight       geometry.Scalar
 }
 type configuration struct {
 	UpdateOnRefresh    bool
