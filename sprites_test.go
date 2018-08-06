@@ -32,6 +32,7 @@ func TestSpriteRendering(t *testing.T) {
 	Cfg.SpriteTimerMode = USE_FRAME_COUNT
 	Cfg.AllowFrameSkipping = false
 	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 0, 0, 0, 0});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp.Start()
 	frameCount = 0
 	sp.lastFrameCount = 0
 
@@ -50,6 +51,7 @@ func TestSpriteRendering(t *testing.T) {
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp.Start()
 	expectedFrameIndexes := []int32{1, 3, 4}
 
 	for _, v := range sp.delays {
@@ -67,6 +69,7 @@ func TestSpriteRendering(t *testing.T) {
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp.Start()
 	expectedFrameIndexes = []int32{1, 1, 1, 3, 3, 3, 3, 3, 4}
 
 	for _, v := range sp.delays {
@@ -84,6 +87,7 @@ func TestSpriteRendering(t *testing.T) {
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp.Start()
 	expectedFrameIndexes = []int32{0, 1}
 
 	for _, v := range sp.delays {
@@ -101,6 +105,7 @@ func TestSpriteRendering(t *testing.T) {
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp.Start()
 	expectedFrameIndexes = []int32{0, 1, 3, 4, 1, 2, 3}
 
 	for _, v := range sp.delays {
@@ -131,6 +136,16 @@ func TestSpriteControl(t *testing.T) {
 	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, 1, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp.lastFrameCount = 0
 
+	sp.IncrementTime()
+	sp.IncrementTime()
+	sp.IncrementTime()
+
+	tools.Test(sp.FrameIndex == 0, "framecount changed before start of animation", t)
+
+	sp.Start()
+
+	Present()
+	Present()
 	Present()
 	sp.IncrementTime()
 	sp.Pause()
