@@ -130,8 +130,8 @@ func Clear() error {
 }
 func Present() error {
 	screenRenderer.Present()
+	frameCount += 1
 	//Clear up dirty frameBuffer
 	err := Clear();	if err != nil {return errors.Wrap(err, "could not prepare next frame")}
-	frameCount += 1
 	return nil
 }

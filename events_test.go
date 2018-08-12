@@ -52,7 +52,7 @@ func TestInteractive(t *testing.T) {
 		default:
 		}
 		updateEvents()
-		clicked, err := testBox.IsClicked(ButtonTypes.Left);	if err != nil {tools.WrapErr(err, "could not check for clicked rect", t)}
+		clicked, err := testBox.IsClicked(Buttons.Left);	if err != nil {tools.WrapErr(err, "could not check for clicked rect", t)}
 		if clicked {
 			run = false
 			testBox.Fill(0, 255, 0, 255)

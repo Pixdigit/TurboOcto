@@ -24,10 +24,10 @@ type mouseButtons struct {
 }
 
 var Mouse mouseState
-var ButtonTypes mouseButtons
+var Buttons mouseButtons
 
 func init() {
-	ButtonTypes = mouseButtons{
+	Buttons = mouseButtons{
 		Left:   buttonPosition(sdl.BUTTON_LEFT),
 		Center: buttonPosition(sdl.BUTTON_MIDDLE),
 		Right:  buttonPosition(sdl.BUTTON_RIGHT),
@@ -40,11 +40,11 @@ func init() {
 		0,
 		0,
 		map[buttonPosition]*buttonState{
-			ButtonTypes.Left:   RELEASED.copy(),
-			ButtonTypes.Center: RELEASED.copy(),
-			ButtonTypes.Right:  RELEASED.copy(),
-			ButtonTypes.X1:     RELEASED.copy(),
-			ButtonTypes.X2:     RELEASED.copy(),
+			Buttons.Left:   RELEASED.copy(),
+			Buttons.Center: RELEASED.copy(),
+			Buttons.Right:  RELEASED.copy(),
+			Buttons.X1:     RELEASED.copy(),
+			Buttons.X2:     RELEASED.copy(),
 		},
 	}
 }
