@@ -164,6 +164,9 @@ func (s *sprite) Blit(dstTexture *sdl.Texture) error {
 func (s *sprite) IsClicked(which buttonPosition) (bool, error) {
 	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
 }
+func (s *sprite) HasMouseState(which buttonPosition, state buttonState) (bool, error) {
+	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == state), nil
+}
 
 func (s *sprite) Start() error {
 	s.animationStatus = RUNNING

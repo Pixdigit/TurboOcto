@@ -126,11 +126,12 @@ func FillScreen(r, g, b, a uint8) error {
 	return nil
 }
 func Clear() error {
-	FillScreen(0, 0, 0, 0)
-	return nil
+	return FillScreen(0, 0, 0, 0)
 }
 func Present() error {
 	screenRenderer.Present()
+	//Clear up dirty frameBuffer
+	err := Clear();	if err != nil {return errors.Wrap(err, "could not prepare next frame")}
 	frameCount += 1
 	return nil
 }
