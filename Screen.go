@@ -93,6 +93,7 @@ func Fullscreen() error {
 func Windowed() error {
 	const SDL_WINDOW_WINDOWED = 0
 	window.SetFullscreen(SDL_WINDOW_WINDOWED)
+	window.SetSize(getSDLSize(windowSize))
 	window.SetPosition(sdl.WINDOWPOS_CENTERED, sdl.WINDOWPOS_CENTERED)
 	canvasSize = windowSize.Copy()
 	Clear()

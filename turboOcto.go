@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	"github.com/veandco/go-sdl2/ttf"
 )
 
 func init() {
@@ -21,6 +22,12 @@ func init() {
 		fmt.Println(errors.Wrap(err, "could not initialize environment"))
 		Quit()
 	}
+	err = initializeTextProcessing()
+	if err != nil {
+		fmt.Println(errors.Wrap(err, "could not initialize text processing"))
+		Quit()
+	}
+
 }
 
 func Update() error {
@@ -34,5 +41,9 @@ func Quit() {
 	screenRenderer.Destroy()
 	window.Destroy()
 	img.Quit()
+	if ttf.WasInit() {
+		ttf.Quit()
+	}
+	//If anything was init
 	sdl.Quit()
 }
