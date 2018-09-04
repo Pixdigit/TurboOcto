@@ -7,10 +7,6 @@ import (
 	geo "gitlab.com/Pixdigit/geometry"
 )
 
-func initializeTextProcessing() error {
-	return ttf.Init()
-}
-
 type renderMethod int
 
 const (
@@ -19,9 +15,7 @@ const (
 	SOLID
 )
 
-type GlyphMetrics struct {
-	ttf.GlyphMetrics
-}
+type GlyphMetrics ttf.GlyphMetrics
 
 type Font struct {
 	*ttf.Font
@@ -30,6 +24,10 @@ type Font struct {
 	ColorGreen uint8
 	ColorBlue  uint8
 	ColorAlpha uint8
+}
+
+func initializeTextProcessing() error {
+	return ttf.Init()
 }
 
 func colorToSDLColor(r, g, b, a uint8) sdl.Color {
@@ -75,8 +73,8 @@ func (f *Font) TextSize(text string) (geo.Size, error) {
 	return geo.Size{geo.Scalar(w), geo.Scalar(h)}, nil
 }
 
-func (f *Font) GlyphMetrics() (*GlyphMetrics, error) {
-	metrics, err := f.GlyphMetrics();	if err != nil {return nil, errors.Wrap(err, "could not get metrics")}
+func (f *Font) GlyphMetrics(char rune) (*GlyphMetrics, error) {
+	metrics, err := f.GlyphMetrics(char);	if err != nil {return nil, errors.Wrap(err, "could not get metrics")}
 	turboOctoGlyphMetrics := GlyphMetrics(*metrics)
 	return &turboOctoGlyphMetrics, nil
 }
