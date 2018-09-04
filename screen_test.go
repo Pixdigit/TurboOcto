@@ -12,7 +12,7 @@ func TestScreen(t *testing.T) {
 	Windowed()
 	testDelay := uint32(30)
 	tools.TestAgainstStrings(
-		func(s string) error { return SetDecoration(s, "testEnv/testIcon.png") },
+		func(s string) error { return SetDecoration(s, "assets/images/testIcon.png") },
 		func() (string, error) { s := window.GetTitle(); return s, nil },
 		"window title not set properly", t)
 	sdl.Delay(testDelay)
