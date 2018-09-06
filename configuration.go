@@ -20,6 +20,8 @@ type configuration struct {
 	AllowFrameSkipping bool
 	SpriteTimerMode    timerMode
 	ResourcePath       string
+    ConfigPath string
+    SaveOnQuit bool
 	internal           internals
 }
 
@@ -38,7 +40,9 @@ func LoadDefaultConf() error {
 		UpdateOnRefresh:    true,
 		AllowFrameSkipping: true,
 		SpriteTimerMode:    USE_FRAME_COUNT,
-		ResourcePath:       "./",
+        ResourcePath:       "./",
+        ConfigPath:       "./config.ini",
+        SaveOnQuit:       true,
 		internal: internals{
 			Fullscreen: true,
 		},
@@ -65,10 +69,10 @@ func LoadConf(dataSrc interface{}) error {
 	return nil
 }
 
-func SaveConf(filePath string) error {
-	ok, err := pathExists(filePath);	if err != nil {return errors.Wrap(err, "could not check if path to configuration exists")}
+func SaveConf() error {
+	ok, err := pathExists(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not check if path to configuration exists")}
 	if !ok {
-		_, err = os.Create(filePath);	if err != nil {return errors.Wrap(err, "could not create file to save conf in")}
+		_, err = os.Create(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not create file to save conf in")}
 	}
 
 	Cfg.internal = internals{
@@ -79,10 +83,10 @@ func SaveConf(filePath string) error {
 		vSize.Height,
 	}
 
-	cfgIniFile, err := ini.Load(filePath);	if err != nil {return errors.Wrap(err, "could not load configuration file \""+filePath+"\"")}
+	cfgIniFile, err := ini.Load(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not load configuration file \""+Cfg.ConfigPath+"\"")}
 	err = cfgIniFile.Section(confSectionName).ReflectFrom(&Cfg);	if err != nil {return errors.Wrap(err, "could not reflect configuration into ini")}
 	err = cfgIniFile.Section(internalConfSectionName).ReflectFrom(&Cfg.internal);	if err != nil {return errors.Wrap(err, "could not reflect internal configuration into ini")}
-	err = cfgIniFile.SaveTo(filePath);	if err != nil {return errors.Wrap(err, "could not save configuration to file")}
+	err = cfgIniFile.SaveTo(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not save configuration to file")}
 
 	return nil
 }

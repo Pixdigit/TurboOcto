@@ -37,7 +37,7 @@ func Update() error {
 	return nil
 }
 
-func Quit() {
+func Quit() error {
 	screenRenderer.Destroy()
 	window.Destroy()
 	img.Quit()
@@ -46,4 +46,11 @@ func Quit() {
 	}
 	//If anything was init
 	sdl.Quit()
+    if Cfg.SaveOnQuit {
+        err := SaveConf()
+        if err != nil {
+            return errors.Wrap(err, "Could not save config on quit")
+        }
+    }
+    return nil
 }

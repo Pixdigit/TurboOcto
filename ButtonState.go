@@ -1,20 +1,36 @@
 package turboOcto
 
 type buttonState struct {
-	IsDown  bool
-	Changed bool
+	isDown  bool
+	changed bool
 }
 
 func (b *buttonState) update(isDown bool) {
-	if b.IsDown != isDown {
-		b.Changed = true
+	if b.isDown != isDown {
+		b.changed = true
 	} else {
-		b.Changed = false
+		b.changed = false
 	}
-	b.IsDown = isDown
+	b.isDown = isDown
 }
 func (b *buttonState) copy() *buttonState {
-	return &buttonState{b.IsDown, b.Changed}
+	return &buttonState{b.isDown, b.changed}
+}
+
+func (b *buttonState) equals(b2 buttonState) bool {
+	return b.isDown == b2.isDown && b.changed == b2.changed
+}
+
+func (b *buttonState) Is(b2 buttonState) (bool, error) {
+	if b == nil {
+        //Default state is RELEASED
+		if b2.equals(RELEASED) {
+			return true, nil
+		} else {
+			return false, nil
+		}
+	}
+	return b.equals(b2), nil
 }
 
 var (

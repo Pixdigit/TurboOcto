@@ -11,10 +11,10 @@ func updateEvents() error {
 	Mouse.Movement.Y = 0
 	Mouse.ScrollRelative = 0
 	for i := range Mouse.Buttons {
-		Mouse.Buttons[i].Changed = false
+		Mouse.Buttons[i].changed = false
 	}
 	for i := range Keyboard {
-		Keyboard[i].Changed = false
+		Keyboard[i].changed = false
 	}
 
 	//Process events

@@ -46,8 +46,8 @@ func TestFontRenderMethods(t *testing.T) {
 	rect = sdl.Rect{0, 200, int32(size.Width), int32(size.Height)}
 	screenRenderer.Copy(texture, nil, &rect)
 	screenRenderer.Present()
-    if !testing.Short() {
-        window.SetTitle("Check fonts")
-        sdl.Delay(3000)
-    }
+	if !testing.Short() {
+		window.SetTitle("Check fonts")
+		sdl.Delay(3000)
+	}
 }
