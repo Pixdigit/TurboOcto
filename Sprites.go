@@ -10,7 +10,7 @@ import (
 type Sprite struct {
 	frames     []*sdl.Texture
 	dimensions []geometry.Size
-	*geometry.Rect
+	*Rect
 	delays             []int32
 	animationStatus    Runlevel
 	timerMode          timerMode
@@ -47,8 +47,8 @@ func NewSprite() (*Sprite, error) {
 	newSprite.Visible = true
 	// TODO: Is this needed?
 	//newSprite.dimensions = []Size{Size{}}
-	rect := geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.CENTER)
-	newSprite.Rect = &rect
+	rect, err := NewRectFromGeometryRect(geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.CENTER));	if err != nil {return nil, errors.Wrap(err, "could not create geometry for sprite")}
+	newSprite.Rect = rect
 
 	return newSprite, nil
 }
