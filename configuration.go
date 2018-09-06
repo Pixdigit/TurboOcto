@@ -20,8 +20,8 @@ type configuration struct {
 	AllowFrameSkipping bool
 	SpriteTimerMode    timerMode
 	ResourcePath       string
-    ConfigPath string
-    SaveOnQuit bool
+	ConfigPath         string
+	SaveOnQuit         bool
 	internal           internals
 }
 
@@ -40,9 +40,9 @@ func LoadDefaultConf() error {
 		UpdateOnRefresh:    true,
 		AllowFrameSkipping: true,
 		SpriteTimerMode:    USE_FRAME_COUNT,
-        ResourcePath:       "./",
-        ConfigPath:       "./config.ini",
-        SaveOnQuit:       true,
+		ResourcePath:       "./",
+		ConfigPath:         "./config.ini",
+		SaveOnQuit:         true,
 		internal: internals{
 			Fullscreen: true,
 		},
@@ -75,13 +75,7 @@ func SaveConf() error {
 		_, err = os.Create(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not create file to save conf in")}
 	}
 
-	Cfg.internal = internals{
-		isFullscreen,
-		windowSize.Width,
-		windowSize.Height,
-		vSize.Width,
-		vSize.Height,
-	}
+	err = updateCfgFromInternals();	if err != nil {return errors.Wrap(err, "could not read internal conf")}
 
 	cfgIniFile, err := ini.Load(Cfg.ConfigPath);	if err != nil {return errors.Wrap(err, "could not load configuration file \""+Cfg.ConfigPath+"\"")}
 	err = cfgIniFile.Section(confSectionName).ReflectFrom(&Cfg);	if err != nil {return errors.Wrap(err, "could not reflect configuration into ini")}
@@ -103,6 +97,18 @@ func updateFromInternalCfg() error {
 
 	err := SetWindowSize(geometry.Size{Cfg.internal.WindowWidth, Cfg.internal.WindowWidth});	if err != nil {return errors.Wrap(err, errMsg)}
 	err = SetVirtualSize(geometry.Size{Cfg.internal.VWidth, Cfg.internal.VHeight});	if err != nil {return errors.Wrap(err, errMsg)}
+
+	return nil
+}
+
+func updateCfgFromInternals() error {
+	Cfg.internal = internals{
+		isFullscreen,
+		windowSize.Width,
+		windowSize.Height,
+		vSize.Width,
+		vSize.Height,
+	}
 
 	return nil
 }

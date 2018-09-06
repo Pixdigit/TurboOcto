@@ -23,7 +23,7 @@ func (b *buttonState) equals(b2 buttonState) bool {
 
 func (b *buttonState) Is(b2 buttonState) (bool, error) {
 	if b == nil {
-        //Default state is RELEASED
+		//Default state is RELEASED
 		if b2.equals(RELEASED) {
 			return true, nil
 		} else {

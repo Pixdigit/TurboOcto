@@ -46,11 +46,8 @@ func Quit() error {
 	}
 	//If anything was init
 	sdl.Quit()
-    if Cfg.SaveOnQuit {
-        err := SaveConf()
-        if err != nil {
-            return errors.Wrap(err, "Could not save config on quit")
-        }
-    }
-    return nil
+	if Cfg.SaveOnQuit {
+		err := SaveConf();	if err != nil {return errors.Wrap(err, "Could not save config on quit")}
+	}
+	return nil
 }
