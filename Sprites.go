@@ -6,7 +6,8 @@ import (
 	"gitlab.com/Pixdigit/geometry"
 )
 
-type sprite struct {
+//Sprites should only be initialized with NewSprite or the LoadSprite[…] functions
+type Sprite struct {
 	frames     []*sdl.Texture
 	dimensions []geometry.Size
 	*geometry.Rect
@@ -21,7 +22,7 @@ type sprite struct {
 	FrameIndex         int32
 	layer              int32
 	Visible            bool
-	constraint         func(*sprite) error
+	constraint         func(*Sprite) error
 }
 
 type timerMode int
@@ -31,13 +32,13 @@ const (
 	USE_TIME_PASSED
 )
 
-var sprites []*sprite
+var sprites []*Sprite
 
-func NewSprite() (*sprite, error) {
-	newSprite := &sprite{}
-	//ensure sprite is the topmost of level 0
-	sprites = append([]*sprite{newSprite}, sprites...)
-	err := newSprite.ChangeLayer(0);	if err != nil {return &sprite{}, errors.Wrap(err, "could not change layer for new Sprite")}
+func NewSprite() (*Sprite, error) {
+	newSprite := &Sprite{}
+	//ensure Sprite is the topmost of level 0
+	sprites = append([]*Sprite{newSprite}, sprites...)
+	err := newSprite.ChangeLayer(0);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not change layer for new Sprite")}
 
 	newSprite.timerMode = timerMode(Cfg.SpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
@@ -54,20 +55,20 @@ func NewSprite() (*sprite, error) {
 
 //ChangeLayer is quite performance heavy since it moves an element within a slice
 //this, however, will save computational power at Blit-Time
-func (s *sprite) ChangeLayer(layer int32) error {
+func (s *Sprite) ChangeLayer(layer int32) error {
 	s.layer = layer
 	for i := len(sprites) - 1; i >= 0; i-- {
 		sp := sprites[i]
 		if sp.layer <= s.layer {
 			for i, sp := range sprites {
 				if s == sp {
-					var newSprites []*sprite
+					var newSprites []*Sprite
 					newSprites = append(newSprites, sprites[:i]...)
 					newSprites = append(newSprites, sprites[i+1:]...)
 					sprites = newSprites
 				}
 			}
-			var newSprites []*sprite
+			var newSprites []*Sprite
 			newSprites = append(newSprites, sprites[:i]...)
 			newSprites = append(newSprites, s)
 			newSprites = append(newSprites, sprites[i:]...)
@@ -78,7 +79,7 @@ func (s *sprite) ChangeLayer(layer int32) error {
 	return nil
 }
 
-func (s *sprite) SetDelay(time int32) error {
+func (s *Sprite) SetDelay(time int32) error {
 	cummulativeWaitingTime := int32(0)
 	s.delays[s.FrameIndex] = time
 	for _, delay := range s.delays {
@@ -91,7 +92,7 @@ func (s *sprite) SetDelay(time int32) error {
 	return nil
 }
 
-func (s *sprite) IncrementTime() error {
+func (s *Sprite) IncrementTime() error {
 	var currentTime int32
 	if s.animationStatus == RUNNING {
 		currentTime := int32(sdl.GetTicks())
@@ -125,30 +126,30 @@ func (s *sprite) IncrementTime() error {
 	return nil
 }
 
-func (s *sprite) SetConstraint(constraint func(*sprite) error) error {
+func (s *Sprite) SetConstraint(constraint func(*Sprite) error) error {
 	s.constraint = constraint
 	s.constraint(s)
 	return nil
 }
 
-func (s *sprite) SetSize(size geometry.Size) error {
+func (s *Sprite) SetSize(size geometry.Size) error {
 	s.dimensions[s.FrameIndex] = size
 	s.Rect.SetSize(size)
 	return nil
 }
 
-func (s *sprite) BlitToScreen() error {
+func (s *Sprite) BlitToScreen() error {
 	if !s.Visible {
 		return nil
 	}
 	size := s.Rect.Size()
 	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
-	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to screenRenderer")}
+	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy Sprite frame to screenRenderer")}
 	return nil
 }
 
-func (s *sprite) Blit(dstTexture *sdl.Texture) error {
+func (s *Sprite) Blit(dstTexture *sdl.Texture) error {
 	if !s.Visible {
 		return nil
 	}
@@ -157,31 +158,31 @@ func (s *sprite) Blit(dstTexture *sdl.Texture) error {
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
 	renderer.SetRenderTarget(dstTexture)
-	err = renderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy sprite frame to texture")}
+	err = renderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy Sprite frame to texture")}
 	return nil
 }
 
-func (s *sprite) IsClicked(which buttonPosition) (bool, error) {
+func (s *Sprite) IsClicked(which buttonPosition) (bool, error) {
 	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
 }
-func (s *sprite) HasMouseState(which buttonPosition, state buttonState) (bool, error) {
+func (s *Sprite) HasMouseState(which buttonPosition, state buttonState) (bool, error) {
 	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == state), nil
 }
 
-func (s *sprite) Start() error {
+func (s *Sprite) Start() error {
 	s.animationStatus = RUNNING
 	s.lastFrameCount = frameCount
 	s.lastBlit = int32(sdl.GetTicks())
 	s.lastTimer = s.timer - 1
 	return nil
 }
-func (s *sprite) Stop() error {
+func (s *Sprite) Stop() error {
 	s.FrameIndex = 0
 	s.timer = 0
 	s.animationStatus = STOPPED
 	return nil
 }
-func (s *sprite) Pause() error {
+func (s *Sprite) Pause() error {
 	s.animationStatus = PAUSED
 	return nil
 }
