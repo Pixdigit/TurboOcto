@@ -30,6 +30,10 @@ func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*S
 	return newSprite, nil
 }
 
+func LoadAnimatedSpriteFromTexture(texture *sdl.Texture) (*Sprite, error) {
+    return LoadAnimatedSpriteFromTextures([]*sdl.Texture{texture}, []int32{0})
+}
+
 func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
 	var textures []*sdl.Texture
 	for _, fileName := range fileNames {

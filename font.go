@@ -35,7 +35,7 @@ func colorToSDLColor(r, g, b, a uint8) sdl.Color {
 }
 
 func OpenFont(file string, size int) (Font, error) {
-	sdlFont, err := ttf.OpenFont(file, size)
+	sdlFont, err := ttf.OpenFont(Cfg.ResourcePath + file, size)
 	f := Font{
 		sdlFont,
 		BLENDED,
