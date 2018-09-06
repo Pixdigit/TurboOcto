@@ -8,6 +8,7 @@ import (
 
 type Rect struct {
 	geometry.Rect
+	constraint func(*Rect) error
 }
 
 func NewRect(p geometry.Point, s geometry.Size, fixPoint geometry.AnchorPoint) (*Rect, error) {
@@ -19,7 +20,7 @@ func NewRect(p geometry.Point, s geometry.Size, fixPoint geometry.AnchorPoint) (
 	return r, nil
 }
 func NewRectFromGeometryRect(r geometry.Rect) (*Rect, error) {
-	rect := &Rect{r}
+	rect := &Rect{r, func(r *Rect) error { return nil }}
 	return rect, nil
 }
 
@@ -39,6 +40,15 @@ func (r *Rect) Fill(red, green, blue, a uint8) error {
 
 func (r *Rect) IsClicked(which buttonPosition) (bool, error) {
 	return r.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
+}
+func (r *Rect) HasMouseState(which buttonPosition, state buttonState) (bool, error) {
+	return r.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == state), nil
+}
+
+func (r *Rect) SetConstraint(constraint func(*Rect) error) error {
+	r.constraint = constraint
+	r.constraint(r)
+	return nil
 }
 
 func (r *Rect) SDLRect() (*sdl.Rect, error) {

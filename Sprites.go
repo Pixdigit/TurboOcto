@@ -22,7 +22,6 @@ type Sprite struct {
 	FrameIndex         int32
 	layer              int32
 	Visible            bool
-	constraint         func(*Sprite) error
 }
 
 type timerMode int
@@ -126,12 +125,6 @@ func (s *Sprite) IncrementTime() error {
 	return nil
 }
 
-func (s *Sprite) SetConstraint(constraint func(*Sprite) error) error {
-	s.constraint = constraint
-	s.constraint(s)
-	return nil
-}
-
 func (s *Sprite) SetSize(size geometry.Size) error {
 	s.dimensions[s.FrameIndex] = size
 	s.Rect.SetSize(size)
@@ -162,13 +155,6 @@ func (s *Sprite) Blit(dstTexture *sdl.Texture) error {
 	return nil
 }
 
-func (s *Sprite) IsClicked(which buttonPosition) (bool, error) {
-	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
-}
-func (s *Sprite) HasMouseState(which buttonPosition, state buttonState) (bool, error) {
-	return s.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == state), nil
-}
-
 func (s *Sprite) Start() error {
 	s.animationStatus = RUNNING
 	s.lastFrameCount = frameCount
@@ -190,6 +176,7 @@ func (s *Sprite) Pause() error {
 func updateAllSprites() error {
 	for _, sp := range sprites {
 		err := sp.IncrementTime();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
+		err = sp.constraint(sp.Rect);	if err != nil {return errors.Wrap(err, "could not apply constraint to Sprite")}
 		err = sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
 	}
 	return nil
