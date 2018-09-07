@@ -17,6 +17,7 @@ const (
 
 type GlyphMetrics ttf.GlyphMetrics
 
+//TODO: Add Size
 type Font struct {
 	*ttf.Font
 	Method     renderMethod

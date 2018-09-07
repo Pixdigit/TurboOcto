@@ -25,6 +25,7 @@ func NewRectFromGeometryRect(r geometry.Rect) (*Rect, error) {
 }
 
 func (r *Rect) DrawBoundaries(red, green, blue, a uint8) error {
+    // FIXME: Gets drawn over with sprites
 	SDLRect, err := r.SDLRect();	if err != nil {return errors.Wrap(err, "could not get boundaries")}
 	err = screenRenderer.SetDrawColor(red, green, blue, a);	if err != nil {return errors.Wrap(err, "could not set draw color")}
 	err = screenRenderer.DrawRect(SDLRect);	if err != nil {return errors.Wrap(err, "could not draw Rect")}
