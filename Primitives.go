@@ -1,7 +1,6 @@
 package turboOcto
 
 import (
-	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Pixdigit/geometry"
 )
@@ -24,20 +23,21 @@ func NewRectFromGeometryRect(r geometry.Rect) (*Rect, error) {
 	return rect, nil
 }
 
-func (r *Rect) DrawBoundaries(red, green, blue, a uint8) error {
-    // FIXME: Gets drawn over with sprites
-	SDLRect, err := r.SDLRect();	if err != nil {return errors.Wrap(err, "could not get boundaries")}
-	err = screenRenderer.SetDrawColor(red, green, blue, a);	if err != nil {return errors.Wrap(err, "could not set draw color")}
-	err = screenRenderer.DrawRect(SDLRect);	if err != nil {return errors.Wrap(err, "could not draw Rect")}
-	return nil
-}
-
-func (r *Rect) Fill(red, green, blue, a uint8) error {
-	SDLRect, err := r.SDLRect();	if err != nil {return errors.Wrap(err, "could not Rect boundaries for drawing them")}
-	err = screenRenderer.SetDrawColor(red, green, blue, a);	if err != nil {return errors.Wrap(err, "could not set draw color")}
-	err = screenRenderer.FillRect(SDLRect);	if err != nil {return errors.Wrap(err, "could not draw Rect")}
-	return nil
-}
+//// TODO: Determine if Primitives are renderable
+// func (r *Rect) DrawBoundaries(red, green, blue, a uint8) error {
+// 	// FIXME: Gets drawn over with sprites
+// 	SDLRect, err := r.SDLRect();	if err != nil {return errors.Wrap(err, "could not get boundaries")}
+// 	err = screenRenderer.SetDrawColor(red, green, blue, a);	if err != nil {return errors.Wrap(err, "could not set draw color")}
+// 	err = screenRenderer.DrawRect(SDLRect);	if err != nil {return errors.Wrap(err, "could not draw Rect")}
+// 	return nil
+// }
+//
+// func (r *Rect) Fill(red, green, blue, a uint8) error {
+// 	SDLRect, err := r.SDLRect();	if err != nil {return errors.Wrap(err, "could not Rect boundaries for drawing them")}
+// 	err = screenRenderer.SetDrawColor(red, green, blue, a);	if err != nil {return errors.Wrap(err, "could not set draw color")}
+// 	err = screenRenderer.FillRect(SDLRect);	if err != nil {return errors.Wrap(err, "could not draw Rect")}
+// 	return nil
+// }
 
 func (r *Rect) IsClicked(which buttonPosition) (bool, error) {
 	return r.Rect.Contains(Mouse.Pos) && (*Mouse.Buttons[which] == PRESSING), nil
@@ -58,6 +58,6 @@ func (r *Rect) SDLRect() (*sdl.Rect, error) {
 	SDLRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	return SDLRect, nil
 }
-func (r *Rect) BaseRect() (*geometry.Rect, error) {
-	return &r.Rect, nil
+func (r *Rect) BaseRect() *geometry.Rect {
+	return &r.Rect
 }

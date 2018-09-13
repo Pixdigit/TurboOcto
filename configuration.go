@@ -15,6 +15,7 @@ type internals struct {
 	VWidth       geometry.Scalar
 	VHeight      geometry.Scalar
 }
+//// IDEA: Add debugging util
 type configuration struct {
 	UpdateOnRefresh    bool
 	AllowFrameSkipping bool

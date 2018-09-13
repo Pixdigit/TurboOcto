@@ -3,13 +3,13 @@ package turboOcto
 import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/sdl"
-	"gitlab.com/Pixdigit/geometry"
+	geo "gitlab.com/Pixdigit/geometry"
 )
 
 //Sprites should only be initialized with NewSprite or the LoadSprite[…] functions
 type Sprite struct {
 	frames     []*sdl.Texture
-	dimensions []geometry.Size
+	dimensions []geo.Size
 	*Rect
 	delays             []int32
 	animationStatus    Runlevel
@@ -46,8 +46,17 @@ func NewSprite() (*Sprite, error) {
 	newSprite.Visible = true
 	// TODO: Is this needed?
 	//newSprite.dimensions = []Size{Size{}}
-	rect, err := NewRectFromGeometryRect(geometry.NewRect(geometry.Point{0, 0}, geometry.Size{0, 0}, geometry.CENTER));	if err != nil {return nil, errors.Wrap(err, "could not create geometry for sprite")}
+	rect, err := NewRectFromGeometryRect(geo.NewRect(geo.Point{0, 0}, geo.Size{0, 0}, geo.CENTER));	if err != nil {return nil, errors.Wrap(err, "could not create geometry for sprite")}
 	newSprite.Rect = rect
+
+	//size needs to be at least 1
+	surf, err := sdl.CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask)
+	//r = g = b = alpha = 0
+	surf.FillRect(nil, 255);	if err != nil {return nil, errors.Wrap(err, "could not create dummy pixel data")}
+	texture, err := screenRenderer.CreateTextureFromSurface(surf)
+	newSprite.frames = []*sdl.Texture{texture}
+
+	newSprite.dimensions = []geo.Size{geo.Size{0, 0}}
 
 	return newSprite, nil
 }
@@ -125,7 +134,7 @@ func (s *Sprite) IncrementTime() error {
 	return nil
 }
 
-func (s *Sprite) SetSize(size geometry.Size) error {
+func (s *Sprite) SetSize(size geo.Size) error {
 	s.dimensions[s.FrameIndex] = size
 	s.Rect.SetSize(size)
 	return nil
@@ -136,7 +145,7 @@ func (s *Sprite) BlitToScreen() error {
 		return nil
 	}
 	size := s.Rect.Size()
-	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
+	topLeft := s.Rect.PositionFrom(geo.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	err := screenRenderer.Copy(s.frames[s.FrameIndex], nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy Sprite frame to screenRenderer")}
 	return nil
@@ -147,7 +156,7 @@ func (s *Sprite) Blit(dstTexture *sdl.Texture) error {
 		return nil
 	}
 	size := s.Rect.Size()
-	topLeft := s.Rect.PositionFrom(geometry.TOPLEFT)
+	topLeft := s.Rect.PositionFrom(geo.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
 	renderer.SetRenderTarget(dstTexture)
@@ -176,7 +185,9 @@ func (s *Sprite) Pause() error {
 func updateAllSprites() error {
 	for _, sp := range sprites {
 		err := sp.IncrementTime();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
-		err = sp.constraint(sp.Rect);	if err != nil {return errors.Wrap(err, "could not apply constraint to Sprite")}
+		if sp.constraint != nil {
+			err = sp.constraint(sp.Rect);	if err != nil {return errors.Wrap(err, "could not apply constraint to Sprite")}
+		}
 		err = sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
 	}
 	return nil
