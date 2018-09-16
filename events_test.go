@@ -1,11 +1,8 @@
 package turboOcto
 
-// TODO:
-
-/*
 import (
 	"testing"
-	"time"
+	_ "time"
 
 	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Pixdigit/geometry"
@@ -32,6 +29,10 @@ func TestEventScaling(t *testing.T) {
 }
 
 func TestInteractive(t *testing.T) {
+    //TODO: Wait for descision if primitives have drawing capabilities
+    t.SkipNow()
+
+    /*
 	if testing.Short() {
 		t.SkipNow()
 	}
@@ -67,4 +68,5 @@ func TestInteractive(t *testing.T) {
 		//sdl.Delay(14)
 	}
 	time.Sleep(1 * time.Second)
-}*/
+    */
+}
