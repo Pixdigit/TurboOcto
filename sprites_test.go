@@ -7,34 +7,37 @@ import (
 	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
-func TestSpriteLayers(t *testing.T) {
+//TODO: Move to ZSPace test
+/*func TestSpriteLayers(t *testing.T) {
 	LoadDefaultConf()
 	sp, err := NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp2, err := NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	//create unreferenced sprite
 	_, err = NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	err = sp2.ChangeLayer(2);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	err = sp2.ChangeLayer(3);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+    //TODO:
+	// err = sp2.ChangeLayer(2);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	// err = sp2.ChangeLayer(3);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+
 	//create unreferenced sprite
 	_, err = NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	tools.Test(sprites[0] == sp, "sprite did not remain in position", t)
 	tools.Test(len(sprites) == 4, "unexpected sprite count", t)
 	tools.Test(sprites[len(sprites)-1] == sp2, "sprite on layer 3 did not move to correct position", t)
-}
+}*/
 
 func TestSpriteRendering(t *testing.T) {
-	testTextures := make([]*sdl.Texture, 0)
+	testFrames := make([]*Frame, 0)
 	for i := 0; i < 5; i++ {
 		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);	if err != nil {tools.WrapErr(err, "error while creating test textures", t)}
-		testTextures = append(testTextures, tex)
+		frame, err := NewFrame(tex);	if err != nil {tools.WrapErr(err, "could not create testing frame", t)}
+		testFrames = append(testFrames, frame)
 	}
-	dFrames := int32(0)
-	Cfg.SpriteTimerMode = USE_FRAME_COUNT
+	dFrames := 0
+	Cfg.DefaultSpriteTimerMode = USE_FRAME_COUNT
 	Cfg.AllowFrameSkipping = false
-	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 0, 0, 0, 0});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	sp.Start()
+	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{0, 0, 0, 0, 0});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	frameCount = 0
-	sp.lastFrameCount = 0
+	sp.Start()
 
 	for _, v := range sp.delays {
 		if v == 0 {
@@ -43,16 +46,16 @@ func TestSpriteRendering(t *testing.T) {
 			dFrames = dFrames + v
 		}
 	}
-	for i := int32(0); i < dFrames; i++ {
+	for i := 0; i < dFrames; i++ {
 		tools.Test(sp.FrameIndex == i, "FrameIndex mismatch without FrameSkip", t)
-		err = sp.IncrementTime();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
 		Present()
+		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp.Start()
-	expectedFrameIndexes := []int32{1, 3, 4}
+	expectedFrameIndexes := []int{1, 3, 4}
 
 	for _, v := range sp.delays {
 		if v == 0 {
@@ -61,16 +64,16 @@ func TestSpriteRendering(t *testing.T) {
 			dFrames = dFrames + v
 		}
 	}
-	for i := int32(0); i < dFrames; i++ {
-		err = sp.IncrementTime();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
-		tools.Test(sp.FrameIndex == expectedFrameIndexes[int(i)%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and singe blit frames", t)
+	for i := 0; i < dFrames; i++ {
+		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and singe blit frames", t)
 		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp.Start()
-	expectedFrameIndexes = []int32{1, 1, 1, 3, 3, 3, 3, 3, 4}
+	expectedFrameIndexes = []int{1, 1, 1, 3, 3, 3, 3, 3, 4}
 
 	for _, v := range sp.delays {
 		if v == 0 {
@@ -79,16 +82,16 @@ func TestSpriteRendering(t *testing.T) {
 			dFrames = dFrames + v
 		}
 	}
-	for i := int32(0); i < dFrames; i++ {
-		err = sp.IncrementTime();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
-		tools.Test(sp.FrameIndex == expectedFrameIndexes[int(i)%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and various delays", t)
+	for i := 0; i < dFrames; i++ {
+		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and various delays", t)
 		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp.Start()
-	expectedFrameIndexes = []int32{0, 1}
+	expectedFrameIndexes = []int{0, 1}
 
 	for _, v := range sp.delays {
 		if v == 0 {
@@ -97,16 +100,17 @@ func TestSpriteRendering(t *testing.T) {
 			dFrames = dFrames + v
 		}
 	}
-	for i := int32(0); i < dFrames; i++ {
-		err = sp.IncrementTime();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
-		tools.Test(sp.FrameIndex == expectedFrameIndexes[int(i)%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and unexpected delays", t)
+	for i := 0; i < dFrames; i++ {
+		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and unexpected delays", t)
 		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 	sp.Start()
-	expectedFrameIndexes = []int32{0, 1, 3, 4, 1, 2, 3}
+	//increment in 2 frame steps
+	expectedFrameIndexes = []int{0, 1, 3, 4, 1, 2, 3}
 
 	for _, v := range sp.delays {
 		if v == 0 {
@@ -115,31 +119,27 @@ func TestSpriteRendering(t *testing.T) {
 			dFrames = dFrames + v
 		}
 	}
-	for i := int32(0); i < dFrames; i++ {
-		err = sp.IncrementTime();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
-
-		tools.Test(sp.FrameIndex == expectedFrameIndexes[int(i)%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and multiple present", t)
+	for i := 0; i < dFrames; i++ {
+		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and multiple present", t)
 		Present()
 		Present()
 	}
 }
 
 func TestSpriteControl(t *testing.T) {
-	testTextures := make([]*sdl.Texture, 0)
+	testFrames := make([]*Frame, 0)
 	for i := 0; i < 5; i++ {
 		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);	if err != nil {tools.WrapErr(err, "error while creating test textures", t)}
-		testTextures = append(testTextures, tex)
+		frame, err := NewFrame(tex);	if err != nil {tools.WrapErr(err, "could not create testing frame", t)}
+		testFrames = append(testFrames, frame)
 	}
-	Cfg.SpriteTimerMode = USE_FRAME_COUNT
-	Cfg.AllowFrameSkipping = false
+	Cfg.DefaultSpriteTimerMode = USE_FRAME_COUNT
+	Cfg.AllowFrameSkipping = true
 
-	sp, err := LoadAnimatedSpriteFromTextures(testTextures, []int32{1, 1, 1, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	sp.lastFrameCount = 0
+	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, 1, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
 
-	sp.IncrementTime()
-	sp.IncrementTime()
-	sp.IncrementTime()
-
+	sp.update()
 	tools.Test(sp.FrameIndex == 0, "framecount changed before start of animation", t)
 
 	sp.Start()
@@ -147,21 +147,24 @@ func TestSpriteControl(t *testing.T) {
 	Present()
 	Present()
 	Present()
-	sp.IncrementTime()
+	sp.update()
 	sp.Pause()
 	Present()
 	Present()
 	Present()
-	sp.IncrementTime()
-	tools.Test(sp.FrameIndex == 1, "pausing sprite did not halt frameCount", t)
+	sp.update()
+	tools.Test(sp.FrameIndex == 3, "pausing sprite did not halt frameCount", t)
 
 	sp.Stop()
 	sp.Start()
-	sp.IncrementTime()
+	sp.update()
 	tools.Test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
 	Present()
-	sp.IncrementTime()
-	tools.Test(sp.FrameIndex == 1, "sprite did not start frameCount after stop", t)
+	Present()
+	Present()
+	Present()
+	sp.update()
+	tools.Test(sp.FrameIndex == 4, "sprite did not start frameCount after stop", t)
 	Quit()
 
 }

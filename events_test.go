@@ -1,5 +1,8 @@
 package turboOcto
 
+// TODO:
+
+/*
 import (
 	"testing"
 	"time"
@@ -64,4 +67,4 @@ func TestInteractive(t *testing.T) {
 		//sdl.Delay(14)
 	}
 	time.Sleep(1 * time.Second)
-}
+}*/

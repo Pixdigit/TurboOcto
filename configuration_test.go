@@ -11,7 +11,7 @@ func TestDeserialization(t *testing.T) {
 	exampleConf := []byte(`[turboOcto]
 		UpdateOnRefresh    = true
 		AllowFrameSkipping = false
-		SpriteTimerMode    = 0
+		DefaultSpriteTimerMode    = 0
 		ResourcePath       = ./
 
 		[internal]
@@ -27,7 +27,7 @@ func TestDeserialization(t *testing.T) {
 
 	tools.Test(!Cfg.AllowFrameSkipping, "default configuration did not change", t)
 	tools.Test(Cfg.UpdateOnRefresh, "default configuration did not change", t)
-	tools.Test(Cfg.SpriteTimerMode == 0, "default configuration did not change", t)
+	tools.Test(Cfg.DefaultSpriteTimerMode == 0, "default configuration did not change", t)
 
 	tools.Test(!isFullscreen, "internal configuration did not change", t)
 	t.Log(windowSize)

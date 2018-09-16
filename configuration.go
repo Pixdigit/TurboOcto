@@ -15,15 +15,17 @@ type internals struct {
 	VWidth       geometry.Scalar
 	VHeight      geometry.Scalar
 }
+
 //// IDEA: Add debugging util
 type configuration struct {
-	UpdateOnRefresh    bool
-	AllowFrameSkipping bool
-	SpriteTimerMode    timerMode
-	ResourcePath       string
-	ConfigPath         string
-	SaveOnQuit         bool
-	internal           internals
+	AllowFrameSkipping     bool
+	ConfigPath             string
+	FramesVisibleOnLoad    bool
+	ResourcePath           string
+	SaveOnQuit             bool
+	DefaultSpriteTimerMode timerMode
+	UpdateOnRefresh        bool
+	internal               internals
 }
 
 const confSectionName = "turboOcto"
@@ -38,12 +40,13 @@ func initializeConfiguration() error {
 
 func LoadDefaultConf() error {
 	Cfg = configuration{
-		UpdateOnRefresh:    true,
-		AllowFrameSkipping: true,
-		SpriteTimerMode:    USE_FRAME_COUNT,
-		ResourcePath:       "./",
-		ConfigPath:         "./config.ini",
-		SaveOnQuit:         true,
+		AllowFrameSkipping:     true,
+		ConfigPath:             "./config.ini",
+		FramesVisibleOnLoad:    true,
+		ResourcePath:           "./",
+		SaveOnQuit:             true,
+		DefaultSpriteTimerMode: USE_FRAME_COUNT,
+		UpdateOnRefresh:        true,
 		internal: internals{
 			Fullscreen: true,
 		},

@@ -4,50 +4,47 @@ import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
-	"gitlab.com/Pixdigit/geometry"
 )
 
-func LoadAnimatedSpriteFromTextures(textures []*sdl.Texture, delays []int32) (*Sprite, error) {
-	if len(textures) != len(delays) {
-		return &Sprite{}, errors.New("argument lengths must be equal \"textures " + string(len(textures)) + "  delays " + string(len(delays)))
+func LoadAnimatedSpriteFromFrames(frames []*Frame, delays []int) (*Sprite, error) {
+	if len(frames) != len(delays) {
+		return &Sprite{}, errors.New("argument lengths must be equal \"frames " + string(len(frames)) + "  delays " + string(len(delays)))
 	}
 
-	var dimensions []geometry.Size
-	newSprite, _ := NewSprite()
-	for _, frame := range textures {
-		_, _, w, h, err := frame.Query();	if err != nil {return &Sprite{}, errors.Wrap(err, "could not determine texture size")}
-		dimensions = append(dimensions, geometry.Size{geometry.Scalar(w), geometry.Scalar(h)})
-	}
+	newSprite, err := NewSprite();	if err != nil {return nil, errors.Wrap(err, "could not create empty sprite to load data into")}
 
-	newSprite.frames = textures
+	newSprite.frames = frames
 	newSprite.delays = delays
-	newSprite.dimensions = dimensions
 	newSprite.FrameIndex = 0
-	//Update size
-	newSprite.Rect.SetSize(dimensions[0])
+	newSprite.timer.Duration = float64(delays[newSprite.FrameIndex])
+
 	//ensure Sprite has some delay at any frame
-	err := newSprite.SetDelay(delays[0]);	if err != nil {return &Sprite{}, errors.Wrap(err, "new Sprite has invalid delay")}
+	ok := newSprite.validateDelays()
+	if !ok {
+		return &Sprite{}, errors.New("new Sprite has invalid delay")
+	}
 	return newSprite, nil
 }
 
-func LoadAnimatedSpriteFromTexture(texture *sdl.Texture) (*Sprite, error) {
-	return LoadAnimatedSpriteFromTextures([]*sdl.Texture{texture}, []int32{0})
+func LoadAnimatedSpriteFromTexture(frame *Frame) (*Sprite, error) {
+	return LoadAnimatedSpriteFromFrames([]*Frame{frame}, []int{0})
 }
 
-func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int32) (*Sprite, error) {
-	var textures []*sdl.Texture
+func LoadAnimatedSpriteFromFiles(fileNames []string, delays []int) (*Sprite, error) {
+	var frames []*Frame
 	for _, fileName := range fileNames {
 		texture, err := img.LoadTexture(screenRenderer, Cfg.ResourcePath+fileName);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load Sprite file \""+Cfg.ResourcePath+fileName+"\"")}
-		textures = append(textures, texture)
+		frame, err := NewFrame(texture);	if err != nil {return nil, errors.Wrap(err, "could not load frames for new Sprite")}
+		frames = append(frames, frame)
 	}
-	return LoadAnimatedSpriteFromTextures(textures, delays)
+	return LoadAnimatedSpriteFromFrames(frames, delays)
 }
 
 func LoadSpriteFromFile(filename string) (*Sprite, error) {
-	return LoadAnimatedSpriteFromFiles([]string{filename}, []int32{0})
+	return LoadAnimatedSpriteFromFiles([]string{filename}, []int{0})
 }
 
-func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int32) (*Sprite, error) {
+func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int) (*Sprite, error) {
 	surface, err := img.Load(filename);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not load Sprite image")}
 	if len(rects) == 0 {
 		//D == Amount of
@@ -56,7 +53,7 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
 			rects = append(rects, sdl.Rect{i * surface.H, 0, surface.H, surface.H})
 		}
 	}
-	var textures []*sdl.Texture
+	var frames []*Frame
 	xOffset := int32(0)
 	for _, rect := range rects {
 		if rect.W == 0 || rect.H == 0 {
@@ -67,7 +64,8 @@ func LoadAnimatedSpriteFromFile(filename string, rects []sdl.Rect, delays []int3
 		xOffset += rect.W
 		surface.Blit(&rect, tmpSurface, nil)
 		texture, err := screenRenderer.CreateTextureFromSurface(tmpSurface);	if err != nil {return &Sprite{}, errors.Wrap(err, "could not transfer surface to texture")}
-		textures = append(textures, texture)
+		frame, err := NewFrame(texture);	if err != nil {return nil, errors.Wrap(err, "could not create new frame for new sprite")}
+		frames = append(frames, frame)
 	}
-	return LoadAnimatedSpriteFromTextures(textures, delays)
+	return LoadAnimatedSpriteFromFrames(frames, delays)
 }
