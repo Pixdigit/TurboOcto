@@ -11,7 +11,7 @@ import (
 
 func init() {
 	sdl.Init(sdl.INIT_EVERYTHING)
-	img.Init(0x0000000F) // initialize all formats
+	img.Init(0x0000000F) // initialize all image formats
 	err := initializeGraphics()
 	if err != nil {
 		fmt.Println(errors.Wrap(err, "could not initialize graphics"))

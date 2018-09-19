@@ -5,18 +5,20 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 	geo "gitlab.com/Pixdigit/geometry"
 	"gitlab.com/Pixdigit/simpleTimer"
+	"gitlab.com/Pixdigit/uniqueID"
 )
 
 //Sprites should only be initialized with NewSprite or the LoadSprite[…] functions
 type Sprite struct {
 	*Rect
-	frames             []*Frame
-	delays             []int
-	timer              simpleTimer.Timer
-	animationStatus    Runlevel
-	timerMode          timerMode
 	AllowFrameSkipping bool
 	FrameIndex         int
+	animationStatus    Runlevel
+	delays             []int
+	frames             []*Frame
+	id                 uniqueID.ID
+	timer              simpleTimer.Timer
+	timerMode          timerMode
 }
 
 type timerMode int
@@ -31,9 +33,12 @@ var sprites []*Sprite
 func NewSprite() (*Sprite, error) {
 	newSprite := &Sprite{}
 
+	newSprite.id = uniqueID.NewID()
+
 	newSprite.timerMode = timerMode(Cfg.DefaultSpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.animationStatus = STOPPED
+	//TODO: sort out positioning
 	//Create Rect. dimensions dont matter
 	rect, err := NewRectFromGeometryRect(geo.NewRect(geo.Point{0, 0}, geo.Size{0, 0}, geo.CENTER));	if err != nil {return nil, errors.Wrap(err, "could not create geometry for sprite")}
 	newSprite.Rect = rect
@@ -42,6 +47,15 @@ func NewSprite() (*Sprite, error) {
 	newSprite.frames = []*Frame{frame}
 
 	return newSprite, nil
+}
+
+func (s *Sprite) ElementID() uniqueID.ID {
+	return s.id
+}
+
+//TODO: Stub
+func (s *Sprite) Render() error {
+	return nil
 }
 
 func (s *Sprite) SetDelay(time int) error {

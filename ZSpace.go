@@ -2,7 +2,8 @@ package turboOcto
 
 import (
 	"github.com/pkg/errors"
-	"gitlab.com/Pixdigit/uniqueID"
+    "gitlab.com/Pixdigit/uniqueID"
+    "gitlab.com/Pixdigit/sortedList"
 )
 
 //A short comment about the implementation:
@@ -11,6 +12,7 @@ import (
 //With an array only while changing order
 
 type zSpace struct {
+	sortedList.
 	elements []*zSpaceElement
 }
 
@@ -64,3 +66,5 @@ func (z *zSpace) Contains(element RenderElement) bool {
 	}
 	return false
 }
+
+func (z *zSpace) Render()

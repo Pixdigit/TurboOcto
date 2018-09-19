@@ -7,24 +7,6 @@ import (
 	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
-//TODO: Move to ZSPace test
-/*func TestSpriteLayers(t *testing.T) {
-	LoadDefaultConf()
-	sp, err := NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	sp2, err := NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	//create unreferenced sprite
-	_, err = NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-    //TODO:
-	// err = sp2.ChangeLayer(2);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	// err = sp2.ChangeLayer(3);	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-
-	//create unreferenced sprite
-	_, err = NewSprite();	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-	tools.Test(sprites[0] == sp, "sprite did not remain in position", t)
-	tools.Test(len(sprites) == 4, "unexpected sprite count", t)
-	tools.Test(sprites[len(sprites)-1] == sp2, "sprite on layer 3 did not move to correct position", t)
-}*/
-
 func TestSpriteRendering(t *testing.T) {
 	testFrames := make([]*Frame, 0)
 	for i := 0; i < 5; i++ {
@@ -165,6 +147,4 @@ func TestSpriteControl(t *testing.T) {
 	Present()
 	sp.update()
 	tools.Test(sp.FrameIndex == 4, "sprite did not start frameCount after stop", t)
-	Quit()
-
 }
