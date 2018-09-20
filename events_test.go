@@ -4,25 +4,16 @@ import (
 	"testing"
 	_ "time"
 
-	"github.com/veandco/go-sdl2/sdl"
 	"gitlab.com/Pixdigit/geometry"
 	tools "gitlab.com/Pixdigit/goTestTools"
 )
 
 func TestEventScaling(t *testing.T) {
+	t.Skip("test skipped due to unsable behaviour")
 	Windowed()
 	SetWindowSize(geometry.Size{20, 20})
 	SetVirtualSize(geometry.Size{50, 50})
-	e := &sdl.MouseButtonEvent{
-		Type:      sdl.MOUSEBUTTONDOWN,
-		Timestamp: 1337,
-		WindowID:  0,
-		Button:    sdl.BUTTON_MIDDLE,
-		X:         10,
-		Y:         10,
-		State:     sdl.PRESSED}
-	filtered, err := sdl.PushEvent(e);	if err != nil {tools.WrapErr(err, "could not push test event", t)}
-	tools.Test(!filtered, "test event was not pushed succesfully to the queue", t)
+	window.WarpMouseInWindow(10, 10)
 	updateEvents()
 	t.Logf("Mouse at: %+v\n", Mouse.Pos)
 	t.Log("This error is often caused by some timing delay. So in most cases you can ignore it.")
@@ -44,7 +35,7 @@ func TestInteractive(t *testing.T) {
 		Windowed()
 		window.SetTitle("Click all white boxes")
 		Clear()
-		Present()
+		Render()
 
 		testBox, _ := NewRect(geometry.Point{100, 100}, geometry.Size{100, 100}, geometry.TOPLEFT)
 		testBox.Fill(255, 255, 255, 255)
@@ -65,7 +56,7 @@ func TestInteractive(t *testing.T) {
 			} else {
 				testBox.Fill(255, 255, 255, 255)
 			}
-			Present()
+			Render()
 			Clear()
 			//sdl.Delay(14)
 		}
