@@ -1,9 +1,8 @@
 package turboOcto
 
 import (
-	"github.com/pkg/errors"
-    "gitlab.com/Pixdigit/uniqueID"
-    "gitlab.com/Pixdigit/sortedList"
+	"gitlab.com/Pixdigit/sorted"
+	"gitlab.com/Pixdigit/uniqueID"
 )
 
 //A short comment about the implementation:
@@ -12,59 +11,26 @@ import (
 //With an array only while changing order
 
 type zSpace struct {
-	sortedList.
-	elements []*zSpaceElement
+	sorted.Set
 }
 
-var ZSpace zSpace
+var zSpaceSingelton zSpace
 
-type zSpaceElement struct {
-	zValue int
-	RenderElement
-}
 type RenderElement interface {
 	Render() error
-	ElementID() uniqueID.ID
+	ID() uniqueID.ID
 }
 
 func init() {
-	ZSpace = zSpace{}
+	zSpaceSingelton = zSpace{}
 }
 
 func AddElement(element RenderElement, z int) error {
-	if ZSpace.Contains(element) {
-		return errors.New("element already exists within ZSpace")
-	}
-
-	newElement := zSpaceElement{
-		z,
-		element,
-	}
-
-SEARCH:
-	for i, existingElement := range ZSpace.elements {
-		if existingElement.zValue > newElement.zValue {
-			previousSpace := ZSpace.elements[:i]
-			forwardSpace := make([]*zSpaceElement, len(ZSpace.elements[i:]))
-			copy(forwardSpace, ZSpace.elements[i:])
-
-			ZSpace.elements = append(previousSpace, &newElement)
-			ZSpace.elements = append(ZSpace.elements, forwardSpace...)
-			break SEARCH
-		}
-	}
-	return nil
+	return zSpaceSingelton.Insert(element, sorted.Num(z))
 }
 
-func (z *zSpace) Contains(element RenderElement) bool {
-	id := element.ElementID()
-	for _, existingElement := range z.elements {
-		if existingElement.ElementID() == id {
-			//prematurely exit since element was found
-			return true
-		}
+func (z *zSpace) Render() {
+	for _, elem := range z.Set.Elems() {
+		elem.(RenderElement).Render()
 	}
-	return false
 }
-
-func (z *zSpace) Render()

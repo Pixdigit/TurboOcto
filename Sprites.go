@@ -49,7 +49,7 @@ func NewSprite() (*Sprite, error) {
 	return newSprite, nil
 }
 
-func (s *Sprite) ElementID() uniqueID.ID {
+func (s *Sprite) ID() uniqueID.ID {
 	return s.id
 }
 

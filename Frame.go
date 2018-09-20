@@ -42,7 +42,7 @@ func NewEmptyFrame() (*Frame, error) {
 	return frame, nil
 }
 
-func (f *Frame) ElementID() uniqueID.ID {
+func (f *Frame) ID() uniqueID.ID {
 	return f.id
 }
 
