@@ -18,6 +18,7 @@ func TestSpriteRendering(t *testing.T) {
 	Cfg.DefaultSpriteTimerMode = USE_FRAME_COUNT
 	Cfg.AllowFrameSkipping = false
 	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{0, 0, 0, 0, 0});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	AddElement(sp, 0)
 	frameCount = 0
 	sp.Start()
 
@@ -30,12 +31,12 @@ func TestSpriteRendering(t *testing.T) {
 	}
 	for i := 0; i < dFrames; i++ {
 		tools.Test(sp.FrameIndex == i, "FrameIndex mismatch without FrameSkip", t)
-		Present()
-		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		Render()
 	}
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes := []int{1, 3, 4}
 
@@ -47,13 +48,13 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := 0; i < dFrames; i++ {
-		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		Render()
 		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and singe blit frames", t)
-		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes = []int{1, 1, 1, 3, 3, 3, 3, 3, 4}
 
@@ -65,13 +66,13 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := 0; i < dFrames; i++ {
-		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		Render()
 		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and various delays", t)
-		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes = []int{0, 1}
 
@@ -83,29 +84,28 @@ func TestSpriteRendering(t *testing.T) {
 		}
 	}
 	for i := 0; i < dFrames; i++ {
-		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		Render()
 		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and unexpected delays", t)
-		Present()
 	}
 
 	Cfg.AllowFrameSkipping = true
 	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	AddElement(sp, 0)
 	sp.Start()
 	//increment in 2 frame steps
-	expectedFrameIndexes = []int{0, 1, 3, 4, 1, 2, 3}
+	expectedFrameIndexes = []int{1, 2, 3, 0, 1, 3, 4}
 
 	for _, v := range sp.delays {
 		if v == 0 {
-			dFrames++
 		} else {
+			dFrames++
 			dFrames = dFrames + v
 		}
 	}
 	for i := 0; i < dFrames; i++ {
-		err = sp.update();	if err != nil {tools.WrapErr(err, "could not blit sprite", t)}
+		Render()
+		Render()
 		tools.Test(sp.FrameIndex == expectedFrameIndexes[i%len(expectedFrameIndexes)], "FrameIndex mismatch with FrameSkip and multiple present", t)
-		Present()
-		Present()
 	}
 }
 
@@ -120,31 +120,26 @@ func TestSpriteControl(t *testing.T) {
 	Cfg.AllowFrameSkipping = true
 
 	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, 1, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
-
-	sp.update()
-	tools.Test(sp.FrameIndex == 0, "framecount changed before start of animation", t)
-
+	AddElement(sp, 0)
 	sp.Start()
 
-	Present()
-	Present()
-	Present()
-	sp.update()
+	tools.Test(sp.FrameIndex == 0, "framecount changed before start of animation", t)
+
+	Render()
+	Render()
+	Render()
 	sp.Pause()
-	Present()
-	Present()
-	Present()
-	sp.update()
-	tools.Test(sp.FrameIndex == 3, "pausing sprite did not halt frameCount", t)
+	Render()
+	Render()
+	Render()
+	tools.Test(sp.FrameIndex == 2, "pausing sprite did not halt frameCount", t)
 
 	sp.Stop()
 	sp.Start()
-	sp.update()
 	tools.Test(sp.FrameIndex == 0, "stopping sprite did not reset frameCount", t)
-	Present()
-	Present()
-	Present()
-	Present()
-	sp.update()
-	tools.Test(sp.FrameIndex == 4, "sprite did not start frameCount after stop", t)
+	Render()
+	Render()
+	Render()
+	Render()
+	tools.Test(sp.FrameIndex == 3, "sprite did not start frameCount after stop", t)
 }

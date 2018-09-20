@@ -129,7 +129,16 @@ func FillScreen(r, g, b, a uint8) error {
 func Clear() error {
 	return FillScreen(0, 0, 0, 0)
 }
-func Present() error {
+func Render() error {
+	for _, elem := range zSpace.Elems() {
+		//TODO: check for errors
+		elem.(RenderElement).Render()
+		switch thing := elem.(type) {
+		case *Sprite:
+			thing.update()
+		}
+	}
+
 	screenRenderer.Present()
 	frameCount += 1
 	//Clear up dirty frameBuffer

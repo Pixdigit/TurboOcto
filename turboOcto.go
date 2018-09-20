@@ -32,7 +32,7 @@ func init() {
 
 func Update() error {
 	err := updateAllSprites();	if err != nil {return errors.Wrap(err, "could not update sprites")}
-	err = Present();	if err != nil {return errors.Wrap(err, "could not update display")}
+	err = Render();	if err != nil {return errors.Wrap(err, "could not update display")}
 	err = updateEvents();	if err != nil {return errors.Wrap(err, "could not update Events")}
 	return nil
 }

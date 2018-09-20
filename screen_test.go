@@ -42,16 +42,20 @@ func TestRenderer(t *testing.T) {
 	SetWindowSize(geometry.Size{500, 500})
 	FillScreen(255, 127, 0, 255)
 	sdl.Delay(50)
-	Present()
+	baseFrameCount := frameCount
+	Render()
+	tools.Test(frameCount-baseFrameCount == 1, "rendering did not increase frame count", t)
 	if !testing.Short() {
 		sdl.Delay(500)
 		FillScreen(0, 255, 127, 255)
 		sdl.Delay(50)
-		Present()
+		Render()
+		tools.Test(frameCount-baseFrameCount == 2, "rendering did not increase frame count", t)
 		sdl.Delay(500)
 		FillScreen(127, 0, 255, 255)
 		sdl.Delay(50)
-		Present()
+		Render()
+		tools.Test(frameCount-baseFrameCount == 3, "rendering did not increase frame count", t)
 		sdl.Delay(500)
 	}
 }
