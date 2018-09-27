@@ -129,19 +129,29 @@ func FillScreen(r, g, b, a uint8) error {
 func Clear() error {
 	return FillScreen(0, 0, 0, 0)
 }
-func Render() error {
+func Render() []error {
+	errs := []error{}
 	for _, elem := range zSpace.Elems() {
-		//TODO: check for errors
-		elem.(RenderElement).Render()
+		err := elem.(RenderElement).Render()
+		errs = append(errs, errors.Wrap(err, "error while rendering"))
 		switch thing := elem.(type) {
 		case *Sprite:
-			thing.update()
+			err = thing.update()
+			errs = append(errs, errors.Wrap(err, "error while updating"))
 		}
 	}
 
 	screenRenderer.Present()
 	frameCount += 1
 	//Clear up dirty frameBuffer
-	err := Clear();	if err != nil {return errors.Wrap(err, "could not prepare next frame")}
-	return nil
+	err := Clear()
+	if err != nil {
+		err = errors.Wrap(err, "could not prepare next frame")
+		errs = append(errs, errors.Wrap(err, "error while clearing frame"))
+	}
+	if len(errs) >= 1 {
+		return errs
+	}
+
+	return []error{nil}
 }
