@@ -9,12 +9,30 @@ import (
 
 func TestZSpace(t *testing.T) {
 	// LoadDefaultConf()
-	surf, err := sdl.CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask);	if err != nil {tools.WrapErr(err, "could not create a new pixel buffer", t)}
-	surf.FillRect(nil, sdl.Color{0, 0, 0, 0}.Uint32());	if err != nil {tools.WrapErr(err, "could not create dummy pixel data", t)}
-	frame1, err := NewEmptyFrame();	if err != nil {tools.WrapErr(err, "could not create empty frame for new Sprite", t)}
-	frame2, err := NewEmptyFrame();	if err != nil {tools.WrapErr(err, "could not create empty frame for new Sprite", t)}
-	frame3, err := NewEmptyFrame();	if err != nil {tools.WrapErr(err, "could not create empty frame for new Sprite", t)}
-	frame4, err := NewEmptyFrame();	if err != nil {tools.WrapErr(err, "could not create empty frame for new Sprite", t)}
+	surf, err := sdl.CreateRGBSurface(0, 1, 1, 32, rmask, gmask, bmask, amask)
+	if err != nil {
+		tools.WrapErr(err, "could not create a new pixel buffer", t)
+	}
+	surf.FillRect(nil, sdl.Color{0, 0, 0, 0}.Uint32())
+	if err != nil {
+		tools.WrapErr(err, "could not create dummy pixel data", t)
+	}
+	frame1, err := NewEmptyFrame()
+	if err != nil {
+		tools.WrapErr(err, "could not create empty frame for new Sprite", t)
+	}
+	frame2, err := NewEmptyFrame()
+	if err != nil {
+		tools.WrapErr(err, "could not create empty frame for new Sprite", t)
+	}
+	frame3, err := NewEmptyFrame()
+	if err != nil {
+		tools.WrapErr(err, "could not create empty frame for new Sprite", t)
+	}
+	frame4, err := NewEmptyFrame()
+	if err != nil {
+		tools.WrapErr(err, "could not create empty frame for new Sprite", t)
+	}
 	AddElement(frame1, 0)
 	AddElement(frame2, 1)
 	AddElement(frame3, 2)

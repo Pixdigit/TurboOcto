@@ -31,19 +31,36 @@ func init() {
 }
 
 func Update() error {
-	err := updateAllSprites();	if err != nil {return errors.Wrap(err, "could not update sprites")}
 	errs := Render()
-	if len(errs) > 0 {
+	if errs != nil {
 		// COMBAK: Is this ok?
 		//Only inspect first error since errors are usually fixed sequentially
-		err = errs[0];	if err != nil {return errors.Wrap(err, "could not update display")}
+		err := errs[0];	if err != nil {return errors.Wrap(err, "could not update display")}
 	}
+	//TODO: move this
+	/*switch thing := elem.(type) {
+	case *Sprite:
+		err = thing.update()
+		errs = append(errs, errors.Wrap(err, "error while updating"))
+	}*/
+	//COMBAK: Inspect what?
 	//Only inspect
-	err = updateEvents();	if err != nil {return errors.Wrap(err, "could not update Events")}
+	err := updateEvents();	if err != nil {return errors.Wrap(err, "could not update Events")}
 	return nil
 }
 
 func Quit() error {
+	var err error
+	err = nil
+
+	if Cfg.SaveOnQuit {
+		err = SaveConf()
+		//before returning error try quitting everyting
+		if err != nil {
+			err = errors.Wrap(err, "Could not save config on quit")
+		}
+	}
+
 	screenRenderer.Destroy()
 	window.Destroy()
 	img.Quit()
@@ -52,8 +69,5 @@ func Quit() error {
 	}
 	//If anything was init
 	sdl.Quit()
-	if Cfg.SaveOnQuit {
-		err := SaveConf();	if err != nil {return errors.Wrap(err, "Could not save config on quit")}
-	}
-	return nil
+	return err
 }

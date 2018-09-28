@@ -10,14 +10,23 @@ import (
 func TestSpriteRendering(t *testing.T) {
 	testFrames := make([]*Frame, 0)
 	for i := 0; i < 5; i++ {
-		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);	if err != nil {tools.WrapErr(err, "error while creating test textures", t)}
-		frame, err := NewFrame(tex);	if err != nil {tools.WrapErr(err, "could not create testing frame", t)}
+		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
+		if err != nil {
+			tools.WrapErr(err, "error while creating test textures", t)
+		}
+		frame, err := NewFrame(tex)
+		if err != nil {
+			tools.WrapErr(err, "could not create testing frame", t)
+		}
 		testFrames = append(testFrames, frame)
 	}
 	dFrames := 0
 	Cfg.DefaultSpriteTimerMode = USE_FRAME_COUNT
 	Cfg.AllowFrameSkipping = false
-	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{0, 0, 0, 0, 0});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{0, 0, 0, 0, 0})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	frameCount = 0
 	sp.Start()
@@ -35,7 +44,10 @@ func TestSpriteRendering(t *testing.T) {
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 1, 0, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 1, 0, 1, 1})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes := []int{1, 3, 4}
@@ -53,7 +65,10 @@ func TestSpriteRendering(t *testing.T) {
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 3, 0, 5, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{0, 3, 0, 5, 1})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes = []int{1, 1, 1, 3, 3, 3, 3, 3, 4}
@@ -71,7 +86,10 @@ func TestSpriteRendering(t *testing.T) {
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, -2, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, -2, 1, 1})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	sp.Start()
 	expectedFrameIndexes = []int{0, 1}
@@ -89,7 +107,10 @@ func TestSpriteRendering(t *testing.T) {
 	}
 
 	Cfg.AllowFrameSkipping = true
-	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 2, 1, 2, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err = LoadAnimatedSpriteFromFrames(testFrames, []int{1, 2, 1, 2, 1})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	sp.Start()
 	//increment in 2 frame steps
@@ -112,14 +133,23 @@ func TestSpriteRendering(t *testing.T) {
 func TestSpriteControl(t *testing.T) {
 	testFrames := make([]*Frame, 0)
 	for i := 0; i < 5; i++ {
-		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10);	if err != nil {tools.WrapErr(err, "error while creating test textures", t)}
-		frame, err := NewFrame(tex);	if err != nil {tools.WrapErr(err, "could not create testing frame", t)}
+		tex, err := screenRenderer.CreateTexture(sdl.PIXELFORMAT_RGB888, sdl.TEXTUREACCESS_STREAMING, 10, 10)
+		if err != nil {
+			tools.WrapErr(err, "error while creating test textures", t)
+		}
+		frame, err := NewFrame(tex)
+		if err != nil {
+			tools.WrapErr(err, "could not create testing frame", t)
+		}
 		testFrames = append(testFrames, frame)
 	}
 	Cfg.DefaultSpriteTimerMode = USE_FRAME_COUNT
 	Cfg.AllowFrameSkipping = true
 
-	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, 1, 1, 1});	if err != nil {tools.WrapErr(err, "could not create test sprite", t)}
+	sp, err := LoadAnimatedSpriteFromFrames(testFrames, []int{1, 1, 1, 1, 1})
+	if err != nil {
+		tools.WrapErr(err, "could not create test sprite", t)
+	}
 	AddElement(sp, 0)
 	sp.Start()
 

@@ -21,9 +21,15 @@ func TestDeserialization(t *testing.T) {
 		VHeight      = 1366
 		VWidth       = 768`)
 
-	err := LoadDefaultConf();	if err != nil {tools.WrapErr(err, "could not load default configuration", t)}
+	err := LoadDefaultConf()
+	if err != nil {
+		tools.WrapErr(err, "could not load default configuration", t)
+	}
 
-	err = LoadConf(exampleConf);	if err != nil {tools.WrapErr(err, "failed to load configuration", t)}
+	err = LoadConf(exampleConf)
+	if err != nil {
+		tools.WrapErr(err, "failed to load configuration", t)
+	}
 
 	tools.Test(!Cfg.AllowFrameSkipping, "default configuration did not change", t)
 	tools.Test(Cfg.UpdateOnRefresh, "default configuration did not change", t)

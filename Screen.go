@@ -7,6 +7,11 @@ import (
 	"gitlab.com/Pixdigit/geometry"
 )
 
+//Finds usage also elsewhere
+type Renderable interface {
+	Render() error
+}
+
 var screenSize *geometry.Size
 var windowSize *geometry.Size
 var canvasSize *geometry.Size
@@ -132,13 +137,8 @@ func Clear() error {
 func Render() []error {
 	errs := []error{}
 	for _, elem := range zSpace.Elems() {
-		err := elem.(RenderElement).Render()
+		err := elem.(Renderable).Render()
 		errs = append(errs, errors.Wrap(err, "error while rendering"))
-		switch thing := elem.(type) {
-		case *Sprite:
-			err = thing.update()
-			errs = append(errs, errors.Wrap(err, "error while updating"))
-		}
 	}
 
 	screenRenderer.Present()

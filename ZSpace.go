@@ -7,8 +7,8 @@ import (
 
 var zSpace sorted.Set
 
-type RenderElement interface {
-	Render() error
+type UniqueRenderable interface {
+	Renderable
 	ID() uniqueID.ID
 }
 
@@ -17,7 +17,7 @@ func init() {
 }
 
 //Adds an element to the zSpace.
-func AddElement(element RenderElement, z float64) error {
+func AddElement(element UniqueRenderable, z float64) error {
 	//Make sure all elements fulfill RenderElement for the type asserstion later
 	return zSpace.Insert(element, sorted.Num(z))
 }
