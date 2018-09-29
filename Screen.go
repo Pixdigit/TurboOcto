@@ -146,7 +146,6 @@ func Render() []error {
 	//Clear up dirty frameBuffer
 	err := Clear()
 	if err != nil {
-		err = errors.Wrap(err, "could not prepare next frame")
 		errs = append(errs, errors.Wrap(err, "error while clearing frame"))
 	}
 	if len(errs) >= 1 {

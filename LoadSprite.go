@@ -4,6 +4,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/img"
 	"github.com/veandco/go-sdl2/sdl"
+	geo "gitlab.com/Pixdigit/geometry"
 )
 
 func LoadAnimatedSpriteFromFrames(frames []*Frame, delays []int) (*Sprite, error) {
@@ -13,7 +14,14 @@ func LoadAnimatedSpriteFromFrames(frames []*Frame, delays []int) (*Sprite, error
 
 	newSprite, err := NewSprite();	if err != nil {return nil, errors.Wrap(err, "could not create empty sprite to load data into")}
 
-	newSprite.frames = frames
+	renderables := make([]PositionedRenderable, len(frames))
+	for i, frame := range frames {
+		renderables[i] = frame
+	}
+	newSprite.Collection = &Collection{
+		Renderables: renderables,
+		anchor:      &geo.Point{0, 0},
+	}
 	newSprite.delays = delays
 	newSprite.FrameIndex = 0
 	newSprite.timer.Duration = float64(delays[newSprite.FrameIndex])

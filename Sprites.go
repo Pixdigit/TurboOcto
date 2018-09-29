@@ -10,12 +10,11 @@ import (
 
 //Sprites should only be initialized with NewSprite or the LoadSprite[…] functions
 type Sprite struct {
-	*Rect
+	*Collection
 	AllowFrameSkipping bool
 	FrameIndex         int
 	animationStatus    Runlevel
 	delays             []int
-	frames             []*Frame
 	id                 uniqueID.ID
 	timer              simpleTimer.Timer
 	TimerMode          timerMode
@@ -31,20 +30,22 @@ const (
 var sprites []*Sprite
 
 func NewSprite() (*Sprite, error) {
-	newSprite := &Sprite{}
+	//The Renderables have to be initialized
+	newSprite := &Sprite{
+		Collection: &Collection{
+			Renderables: make([]PositionedRenderable, 1),
+			anchor:      &geo.Point{0, 0},
+		},
+	}
 
 	newSprite.id = uniqueID.NewID()
 
 	newSprite.TimerMode = timerMode(Cfg.DefaultSpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.animationStatus = STOPPED
-	//TODO: sort out positioning
-	//Create Rect. dimensions dont matter
-	rect, err := NewRectFromGeometryRect(geo.NewRect(geo.Point{0, 0}, geo.Size{0, 0}, geo.CENTER));	if err != nil {return nil, errors.Wrap(err, "could not create geometry for sprite")}
-	newSprite.Rect = rect
 
 	frame, err := NewEmptyFrame();	if err != nil {return nil, errors.Wrap(err, "could not create empty Frame for new Sprite")}
-	newSprite.frames = []*Frame{frame}
+	newSprite.Renderables = []PositionedRenderable{frame}
 
 	return newSprite, nil
 }
@@ -61,7 +62,7 @@ func (s *Sprite) render() error {
 
 	err := s.update();	if err != nil {return errors.Wrap(err, "could not update sprite")}
 	//TODO: Figure out positioning and return error
-	_ = s.frames[s.FrameIndex].render()
+	err = s.Renderables[s.FrameIndex].render();	if err != nil {return errors.Wrap(err, "error during rendering sprite frame")}
 
 	return nil
 }
@@ -104,26 +105,47 @@ func (s *Sprite) update() error {
 	}
 
 	//Update the frame index
-	incrementFrameIndex := func() {
+	incrementFrameIndex := func() error {
 		s.timer.CarryReset()
-		s.FrameIndex = (s.FrameIndex + 1) % len(s.frames)
+        //increment and wrao around
+		s.FrameIndex = (s.FrameIndex + 1) % len(s.Renderables)
+		for len(s.Renderables) != len(s.delays) {
+			if len(s.Renderables) > len(s.delays) {
+				s.delays = append(s.delays, 0)
+                ok := s.validateDelays()
+    			if !ok {
+                    //revert change and return error
+                    s.delays = s.delays[:len(s.delays)-1]
+    				return errors.New("changing frame count lead to invalid delays")
+    			}
+			} else {
+                lastDelay := s.delays[len(s.delays)-1]
+				s.delays = s.delays[:len(s.delays)-1]
+                ok := s.validateDelays()
+                if !ok {
+                    //revert change and return error
+                    s.delays = append(s.delays, lastDelay)
+    				return errors.New("changing frame count lead to invalid delays")
+    			}
+
+			}
+		}
 		s.timer.Duration = float64(s.delays[s.FrameIndex])
 		s.setTimerStartOffset()
+		return nil
 	}
 	if s.timer.Ended() {
 		if s.AllowFrameSkipping {
 			//Update frame index until timer is below delay
 			for s.timer.Ended() {
-				incrementFrameIndex()
+				err := incrementFrameIndex();	if err != nil {return errors.Wrap(err, "error while incrementing frame index with skipping")}
 			}
 		} else {
-			incrementFrameIndex()
+			err := incrementFrameIndex();	if err != nil {return errors.Wrap(err, "error while incrementing frame index without skipping")}
 		}
 	}
 
 	// TODO: Implement Visible. Note that framecount should not be incremented
-	// TODO: Update frame position
-	// s.Rect.SetSize(s.dimensions[s.FrameIndex])
 
 	return nil
 }
