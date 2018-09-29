@@ -18,7 +18,7 @@ type Sprite struct {
 	frames             []*Frame
 	id                 uniqueID.ID
 	timer              simpleTimer.Timer
-	timerMode          timerMode
+	TimerMode          timerMode
 }
 
 type timerMode int
@@ -35,7 +35,7 @@ func NewSprite() (*Sprite, error) {
 
 	newSprite.id = uniqueID.NewID()
 
-	newSprite.timerMode = timerMode(Cfg.DefaultSpriteTimerMode)
+	newSprite.TimerMode = timerMode(Cfg.DefaultSpriteTimerMode)
 	newSprite.AllowFrameSkipping = Cfg.AllowFrameSkipping
 	newSprite.animationStatus = STOPPED
 	//TODO: sort out positioning
@@ -93,9 +93,9 @@ func (s *Sprite) validateDelays() bool {
 func (s *Sprite) update() error {
 	//Update the timer
 	if s.animationStatus == RUNNING {
-		if s.timerMode == USE_FRAME_COUNT {
+		if s.TimerMode == USE_FRAME_COUNT {
 			s.timer.Update(float64(frameCount))
-		} else if s.timerMode == USE_TIME_PASSED {
+		} else if s.TimerMode == USE_TIME_PASSED {
 			currentTime := sdl.GetTicks()
 			s.timer.Update(float64(currentTime))
 		}
@@ -129,9 +129,9 @@ func (s *Sprite) update() error {
 }
 
 func (s *Sprite) setTimerStartOffset() {
-	if s.timerMode == USE_FRAME_COUNT {
+	if s.TimerMode == USE_FRAME_COUNT {
 		s.timer.LastUpdate = float64(frameCount)
-	} else if s.timerMode == USE_TIME_PASSED {
+	} else if s.TimerMode == USE_TIME_PASSED {
 		currentTime := sdl.GetTicks()
 		s.timer.LastUpdate = float64(currentTime)
 	}
