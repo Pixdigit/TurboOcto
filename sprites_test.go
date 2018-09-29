@@ -31,7 +31,7 @@ func TestSpriteRendering(t *testing.T) {
 	frameCount = 0
 	sp.Start()
 
-	for _, v := range sp.delays {
+	for _, v := range sp.Delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -52,7 +52,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp.Start()
 	expectedFrameIndexes := []int{1, 3, 4}
 
-	for _, v := range sp.delays {
+	for _, v := range sp.Delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -73,7 +73,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp.Start()
 	expectedFrameIndexes = []int{1, 1, 1, 3, 3, 3, 3, 3, 4}
 
-	for _, v := range sp.delays {
+	for _, v := range sp.Delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -94,7 +94,7 @@ func TestSpriteRendering(t *testing.T) {
 	sp.Start()
 	expectedFrameIndexes = []int{0, 1}
 
-	for _, v := range sp.delays {
+	for _, v := range sp.Delays {
 		if v == 0 {
 			dFrames++
 		} else {
@@ -116,7 +116,7 @@ func TestSpriteRendering(t *testing.T) {
 	//increment in 2 frame steps
 	expectedFrameIndexes = []int{1, 2, 3, 0, 1, 3, 4}
 
-	for _, v := range sp.delays {
+	for _, v := range sp.Delays {
 		if v == 0 {
 		} else {
 			dFrames++

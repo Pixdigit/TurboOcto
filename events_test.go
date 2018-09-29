@@ -21,7 +21,7 @@ func TestEventScaling(t *testing.T) {
 }
 
 func TestInteractive(t *testing.T) {
-	//TODO: Wait for descision if primitives have drawing capabilities
+	//TODO: Wait for frame manipulation sub library
 	t.Log("This test is skipped for now")
 	t.SkipNow()
 

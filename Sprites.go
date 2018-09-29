@@ -14,7 +14,7 @@ type Sprite struct {
 	AllowFrameSkipping bool
 	FrameIndex         int
 	animationStatus    Runlevel
-	delays             []int
+	Delays             []int
 	id                 uniqueID.ID
 	timer              simpleTimer.Timer
 	TimerMode          timerMode
@@ -61,7 +61,6 @@ func (s *Sprite) render() error {
 	// }
 
 	err := s.update();	if err != nil {return errors.Wrap(err, "could not update sprite")}
-	//TODO: Figure out positioning and return error
 	err = s.Renderables[s.FrameIndex].render();	if err != nil {return errors.Wrap(err, "error during rendering sprite frame")}
 
 	return nil
@@ -69,7 +68,7 @@ func (s *Sprite) render() error {
 
 func (s *Sprite) SetDelay(time int) error {
 
-	s.delays[s.FrameIndex] = time
+	s.Delays[s.FrameIndex] = time
 	ok := s.validateDelays()
 	if !ok {
 		return errors.New("Sprite does not have any waiting time and will be blitted inifinitly")
@@ -80,7 +79,7 @@ func (s *Sprite) SetDelay(time int) error {
 
 func (s *Sprite) validateDelays() bool {
 	cummulativeWaitingTime := 0
-	for _, delay := range s.delays {
+	for _, delay := range s.Delays {
 		cummulativeWaitingTime += delay
 	}
 	if cummulativeWaitingTime == 0 && s.AllowFrameSkipping {
@@ -109,28 +108,28 @@ func (s *Sprite) update() error {
 		s.timer.CarryReset()
         //increment and wrao around
 		s.FrameIndex = (s.FrameIndex + 1) % len(s.Renderables)
-		for len(s.Renderables) != len(s.delays) {
-			if len(s.Renderables) > len(s.delays) {
-				s.delays = append(s.delays, 0)
+		for len(s.Renderables) != len(s.Delays) {
+			if len(s.Renderables) > len(s.Delays) {
+				s.Delays = append(s.Delays, 0)
                 ok := s.validateDelays()
     			if !ok {
                     //revert change and return error
-                    s.delays = s.delays[:len(s.delays)-1]
+                    s.Delays = s.Delays[:len(s.Delays)-1]
     				return errors.New("changing frame count lead to invalid delays")
     			}
 			} else {
-                lastDelay := s.delays[len(s.delays)-1]
-				s.delays = s.delays[:len(s.delays)-1]
+                lastDelay := s.Delays[len(s.Delays)-1]
+				s.Delays = s.Delays[:len(s.Delays)-1]
                 ok := s.validateDelays()
                 if !ok {
                     //revert change and return error
-                    s.delays = append(s.delays, lastDelay)
+                    s.Delays = append(s.Delays, lastDelay)
     				return errors.New("changing frame count lead to invalid delays")
     			}
 
 			}
 		}
-		s.timer.Duration = float64(s.delays[s.FrameIndex])
+		s.timer.Duration = float64(s.Delays[s.FrameIndex])
 		s.setTimerStartOffset()
 		return nil
 	}

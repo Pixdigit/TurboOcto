@@ -22,7 +22,7 @@ func LoadAnimatedSpriteFromFrames(frames []*Frame, delays []int) (*Sprite, error
 		Renderables: renderables,
 		anchor:      &geo.Point{0, 0},
 	}
-	newSprite.delays = delays
+	newSprite.Delays = delays
 	newSprite.FrameIndex = 0
 	newSprite.timer.Duration = float64(delays[newSprite.FrameIndex])
 
