@@ -53,8 +53,7 @@ func (s *Sprite) ID() uniqueID.ID {
 	return s.id
 }
 
-//TODO: is this needed in spite of ZSpace?
-func (s *Sprite) Render() error {
+func (s *Sprite) render() error {
 	//TODO: check when implementing visibility
 	// if !s.Visible {
 	// 	return nil
@@ -62,7 +61,7 @@ func (s *Sprite) Render() error {
 
 	err := s.update();	if err != nil {return errors.Wrap(err, "could not update sprite")}
 	//TODO: Figure out positioning and return error
-	_ = s.frames[s.FrameIndex].Render()
+	_ = s.frames[s.FrameIndex].render()
 
 	return nil
 }
@@ -151,18 +150,5 @@ func (s *Sprite) Stop() error {
 }
 func (s *Sprite) Pause() error {
 	s.animationStatus = PAUSED
-	return nil
-}
-
-//TODO no longer needed as being replaced by zspace
-func updateAllSprites() error {
-	for _, sp := range sprites {
-		err := sp.update();	if err != nil {return errors.Wrap(err, "could not increment time for all sprites")}
-		if sp.constraint != nil {
-			err = sp.constraint(sp.Rect);	if err != nil {return errors.Wrap(err, "could not apply constraint to Sprite")}
-		}
-		// TODO:
-		// err = sp.BlitToScreen();	if err != nil {return errors.Wrap(err, "could not blit all sprites")}
-	}
 	return nil
 }

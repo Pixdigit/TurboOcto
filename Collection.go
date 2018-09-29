@@ -41,10 +41,10 @@ func (c *Collection) Position() geo.Point {
 	return *c.anchor
 }
 
-func (c *Collection) Render() []error {
+func (c *Collection) render() []error {
 	errs := []error{}
 	for _, elem := range c.Renderables {
-		err := elem.Render()
+		err := elem.render()
 		errs = append(errs, err)
 	}
 	if len(errs) >= 1 {

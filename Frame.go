@@ -46,7 +46,7 @@ func (f *Frame) ID() uniqueID.ID {
 	return f.id
 }
 
-func (f *Frame) Render() error {
+func (f *Frame) render() error {
 	if !f.Visible {
 		return nil
 	}
@@ -54,18 +54,5 @@ func (f *Frame) Render() error {
 	topLeft := f.PositionFrom(geo.TOPLEFT)
 	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
 	err := screenRenderer.Copy(f.Texture, nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy Sprite frame to screenRenderer")}
-	return nil
-}
-
-func (f *Frame) RenderToFrame(dstFrame *Frame) error {
-	if !f.Visible {
-		return nil
-	}
-	size := f.Size()
-	topLeft := f.PositionFrom(geo.TOPLEFT)
-	dstRect := &sdl.Rect{int32(topLeft.X), int32(topLeft.Y), int32(size.Width), int32(size.Height)}
-	renderer, err := sdl.CreateRenderer(window, -1, sdl.RENDERER_TARGETTEXTURE);	if err != nil {return errors.Wrap(err, "could not create renderer to render to texture")}
-	renderer.SetRenderTarget(dstFrame.Texture)
-	err = renderer.Copy(f.Texture, nil, dstRect);	if err != nil {return errors.Wrap(err, "could not copy Sprite frame to texture")}
 	return nil
 }

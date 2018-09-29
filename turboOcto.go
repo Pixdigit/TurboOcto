@@ -37,12 +37,6 @@ func Update() error {
 		//Only inspect first error since errors are usually fixed sequentially
 		err := errs[0];	if err != nil {return errors.Wrap(err, "could not update display")}
 	}
-	//TODO: move this
-	/*switch thing := elem.(type) {
-	case *Sprite:
-		err = thing.update()
-		errs = append(errs, errors.Wrap(err, "error while updating"))
-	}*/
 	//COMBAK: Inspect what?
 	//Only inspect
 	err := updateEvents();	if err != nil {return errors.Wrap(err, "could not update Events")}
@@ -55,10 +49,9 @@ func Quit() error {
 
 	if Cfg.SaveOnQuit {
 		err = SaveConf()
-		//before returning error try quitting everyting
-		if err != nil {
-			err = errors.Wrap(err, "Could not save config on quit")
-		}
+        if err != nil {err = errors.Wrap(err, "Could not save config on quit")}
+        //before returning error try quitting everyting
+
 	}
 
 	screenRenderer.Destroy()

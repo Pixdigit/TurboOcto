@@ -9,7 +9,7 @@ import (
 
 //Finds usage also elsewhere
 type Renderable interface {
-	Render() error
+	render() error
 }
 
 var screenSize *geometry.Size
@@ -137,7 +137,7 @@ func Clear() error {
 func Render() []error {
 	errs := []error{}
 	for _, elem := range zSpace.Elems() {
-		err := elem.(Renderable).Render()
+		err := elem.(Renderable).render()
 		errs = append(errs, errors.Wrap(err, "error while rendering"))
 	}
 
