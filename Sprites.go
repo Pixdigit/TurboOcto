@@ -18,6 +18,7 @@ type Sprite struct {
 	id                 uniqueID.ID
 	timer              simpleTimer.Timer
 	TimerMode          timerMode
+	Visible            bool
 }
 
 type timerMode int
@@ -55,14 +56,11 @@ func (s *Sprite) ID() uniqueID.ID {
 }
 
 func (s *Sprite) render() error {
-	//TODO: check when implementing visibility
-	// if !s.Visible {
-	// 	return nil
-	// }
 
 	err := s.update();	if err != nil {return errors.Wrap(err, "could not update sprite")}
-	err = s.Renderables[s.FrameIndex].render();	if err != nil {return errors.Wrap(err, "error during rendering sprite frame")}
-
+	if s.Visible {
+		err = s.Renderables[s.FrameIndex].render();	if err != nil {return errors.Wrap(err, "error during rendering sprite frame")}
+	}
 	return nil
 }
 
@@ -106,26 +104,26 @@ func (s *Sprite) update() error {
 	//Update the frame index
 	incrementFrameIndex := func() error {
 		s.timer.CarryReset()
-        //increment and wrao around
+		//increment and wrap around
 		s.FrameIndex = (s.FrameIndex + 1) % len(s.Renderables)
 		for len(s.Renderables) != len(s.Delays) {
 			if len(s.Renderables) > len(s.Delays) {
 				s.Delays = append(s.Delays, 0)
-                ok := s.validateDelays()
-    			if !ok {
-                    //revert change and return error
-                    s.Delays = s.Delays[:len(s.Delays)-1]
-    				return errors.New("changing frame count lead to invalid delays")
-    			}
+				ok := s.validateDelays()
+				if !ok {
+					//revert change and return error
+					s.Delays = s.Delays[:len(s.Delays)-1]
+					return errors.New("changing frame count lead to invalid delays")
+				}
 			} else {
-                lastDelay := s.Delays[len(s.Delays)-1]
+				lastDelay := s.Delays[len(s.Delays)-1]
 				s.Delays = s.Delays[:len(s.Delays)-1]
-                ok := s.validateDelays()
-                if !ok {
-                    //revert change and return error
-                    s.Delays = append(s.Delays, lastDelay)
-    				return errors.New("changing frame count lead to invalid delays")
-    			}
+				ok := s.validateDelays()
+				if !ok {
+					//revert change and return error
+					s.Delays = append(s.Delays, lastDelay)
+					return errors.New("changing frame count lead to invalid delays")
+				}
 
 			}
 		}
@@ -143,8 +141,6 @@ func (s *Sprite) update() error {
 			err := incrementFrameIndex();	if err != nil {return errors.Wrap(err, "error while incrementing frame index without skipping")}
 		}
 	}
-
-	// TODO: Implement Visible. Note that framecount should not be incremented
 
 	return nil
 }
