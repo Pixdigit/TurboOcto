@@ -64,30 +64,6 @@ func (s *Sprite) render() error {
 	return nil
 }
 
-func (s *Sprite) SetDelay(time int) error {
-
-	s.Delays[s.FrameIndex] = time
-	ok := s.validateDelays()
-	if !ok {
-		return errors.New("Sprite does not have any waiting time and will be blitted inifinitly")
-	}
-
-	return nil
-}
-
-func (s *Sprite) validateDelays() bool {
-	cummulativeWaitingTime := 0
-	for _, delay := range s.Delays {
-		cummulativeWaitingTime += delay
-	}
-	if cummulativeWaitingTime == 0 && s.AllowFrameSkipping {
-		s.Stop()
-		return false
-	} else {
-		return true
-	}
-}
-
 func (s *Sprite) update() error {
 	//Update the timer
 	if s.animationStatus == RUNNING {
@@ -143,6 +119,30 @@ func (s *Sprite) update() error {
 	}
 
 	return nil
+}
+
+func (s *Sprite) SetDelay(time int) error {
+
+	s.Delays[s.FrameIndex] = time
+	ok := s.validateDelays()
+	if !ok {
+		return errors.New("Sprite does not have any waiting time and will be blitted inifinitly")
+	}
+
+	return nil
+}
+
+func (s *Sprite) validateDelays() bool {
+	cummulativeWaitingTime := 0
+	for _, delay := range s.Delays {
+		cummulativeWaitingTime += delay
+	}
+	if cummulativeWaitingTime == 0 && s.AllowFrameSkipping {
+		s.Stop()
+		return false
+	} else {
+		return true
+	}
 }
 
 func (s *Sprite) setTimerStartOffset() {

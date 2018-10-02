@@ -90,17 +90,16 @@ func SaveConf() error {
 }
 
 func updateFromInternalCfg() error {
-	//TODO: refine error management
-	errMsg := "could not process internal"
+	errMsg := "could not process internal variable: "
 
 	if Cfg.internal.Fullscreen {
-		err := Fullscreen();	if err != nil {return errors.Wrap(err, errMsg)}
+		err := Fullscreen();	if err != nil {return errors.Wrap(err, errMsg + "Fullscreen")}
 	} else {
-		err := Windowed();	if err != nil {return errors.Wrap(err, errMsg)}
+		err := Windowed();	if err != nil {return errors.Wrap(err, errMsg + "Fullscreen")}
 	}
 
-	err := SetWindowSize(geometry.Size{Cfg.internal.WindowWidth, Cfg.internal.WindowWidth});	if err != nil {return errors.Wrap(err, errMsg)}
-	err = SetVirtualSize(geometry.Size{Cfg.internal.VWidth, Cfg.internal.VHeight});	if err != nil {return errors.Wrap(err, errMsg)}
+	err := SetWindowSize(geometry.Size{Cfg.internal.WindowWidth, Cfg.internal.WindowWidth});	if err != nil {return errors.Wrap(err, errMsg + "WindowSize")}
+	err = SetVirtualSize(geometry.Size{Cfg.internal.VWidth, Cfg.internal.VHeight});	if err != nil {return errors.Wrap(err, errMsg + "VirtualSize")}
 
 	return nil
 }
